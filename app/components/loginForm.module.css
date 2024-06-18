@@ -23,6 +23,7 @@
   font-weight: 600;
   text-align: right;
   margin: 1rem 2.5rem;
+  z-index: 100;
 }
 .inputForm {
   display: flex;
