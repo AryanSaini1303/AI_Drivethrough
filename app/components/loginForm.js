@@ -41,7 +41,7 @@ export default function LoginForm() {
         <button type="submit">Log in</button>
         <h6 className={styles.forgPass}>Forgot Password?</h6>
       </form>
-      <h6 className={styles.account}>Don't have an account?</h6>
+      <h6 className={styles.account}>Create a new account?</h6>
     </>
   );
 }
