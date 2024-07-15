@@ -1,4 +1,4 @@
-import styles from "./loginForm.module.css"
+import styles from "./loginForm.module.css";
 import Image from "next/image";
 export default function LoginForm() {
   return (
@@ -16,6 +16,7 @@ export default function LoginForm() {
           name="username"
           id="username"
           placeholder="Username"
+          required
         />
         <Image
           src="/email.svg"
@@ -24,7 +25,13 @@ export default function LoginForm() {
           height={24}
           className={styles.email}
         />
-        <input type="email" name="email" id="email" placeholder="E-mail" />
+        <input
+          type="email"
+          name="email"
+          id="email"
+          placeholder="E-mail"
+          required
+        />
         <Image
           src="/password.svg"
           alt="user"
@@ -37,6 +44,7 @@ export default function LoginForm() {
           name="password"
           id="password"
           placeholder="Password"
+          required
         />
         <button type="submit">Log in</button>
         <h6 className={styles.forgPass}>Forgot Password?</h6>
