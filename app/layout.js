@@ -1,17 +1,36 @@
+// app/layout.tsx
+
 import { Inter } from "next/font/google";
 import "./globals.css";
+import SessionWrapper from "@/components/SessionWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
+// Define your viewport settings here
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: "no"
+};
+
 export const metadata = {
-  title: "AI-DriveThrough",
-  description: "AI driven app to optimize travelling",
+  title: "IDP-Portal",
+  description: "Portal for Student's IDP Registration and Evaluation",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <head>
+        <meta name="viewport" content={`width=${viewport.width}, initial-scale=${viewport.initialScale}, maximum-scale=${viewport.maximumScale}, user-scalable=${viewport.userScalable}`} />
+        {/* Other meta tags or links */}
+      </head>
+      <body className={inter.className}>
+        <SessionWrapper>
+          {children}
+        </SessionWrapper>
+      </body>
     </html>
   );
 }

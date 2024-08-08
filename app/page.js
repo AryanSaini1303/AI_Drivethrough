@@ -1,14 +1,30 @@
+"use client";
 import Image from "next/image";
 import styles from "./page.module.css";
-import { Quicksand } from "next/font/google";
-import LoginForm from "./components/loginForm";
-
-const quicksand = Quicksand({
-  weight: ["600"],
+import { useEffect, useState } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { Noto_Sans } from "next/font/google";
+import { useRouter } from "next/navigation";
+const notoSans = Noto_Sans({
+  weight: "400",
   subsets: ["latin"],
 });
 
 export default function Home() {
+  const router = useRouter();
+  const [revealed, setRevealed] = useState(true);
+  const { data: session } = useSession();
+  useEffect(() => {
+    setTimeout(() => {
+      setRevealed(true);
+    }, 1000);
+  }, []);
+  useEffect(() => {
+    session &&
+      router.push(
+        `/LandingPage/${encodeURIComponent(JSON.stringify(session))}`
+      );
+  }, [session]);
   return (
     <div className={styles.container}>
       <div className={styles.blob1}>
@@ -30,6 +46,14 @@ export default function Home() {
         </svg>
       </div>
       <section className={styles.content}>
+        {revealed && (
+          <div className={styles.roadAnimationContainer}>
+            <Image src={"/car.png"} width={100} height={100} className={styles.car}/>
+            <div className={styles.road}>
+              <div className={styles.roadStripes}></div>
+            </div>
+          </div>
+        )}
         <Image
           className={styles.logo}
           src="/logo.jpg" // Path to the image in the public folder
@@ -37,10 +61,31 @@ export default function Home() {
           width={200} // Specify the width of the image
           height={100} // Specify the height of the image
         />
-        <header>
-          <h1 className={quicksand.className}>Welcome</h1>
-        </header>
-        <LoginForm/>
+        {revealed && (
+          <>
+            <section>
+              <button
+                onClick={() => signIn("google")}
+                className={`${styles.googleLogin} ${notoSans.className}`}
+              >
+                <Image
+                  src={"/googleLogo.png"}
+                  width={24}
+                  height={24}
+                  alt="Google Logo"
+                />
+                <h4> Sign In With Google</h4>
+              </button>
+              <h5
+                className={`${notoSans.className} ${"greeting"}`}
+                style={{ textAlign: "center" }}
+              >
+                AI-powered route and speed optimization for a faster, smoother
+                drive
+              </h5>
+            </section>
+          </>
+        )}
       </section>
     </div>
   );

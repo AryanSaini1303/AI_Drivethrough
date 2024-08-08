@@ -1,4 +1,4 @@
-.container{
+.container {
   height: 100vh;
   width: 100vw;
   position: relative;
@@ -6,33 +6,142 @@
   display: flex;
   justify-content: center;
 }
-.blob1{
+.blob1 {
   position: absolute;
   top: -12rem;
   right: -6rem;
-  width:20rem;
+  width: 20rem;
   margin: 0;
   padding: 0;
 }
-.blob2{
-  position:absolute;
+.blob2 {
+  position: absolute;
   bottom: -12rem;
   width: 20rem;
   left: -5rem;
   transform: rotate(10deg) scaleY(-1);
 }
-.content .logo{
+.content .logo {
   margin: 7rem auto 0 auto;
 }
-.content header h1{
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 500;
+.content section {
+  margin: 12rem 0;
+  position: relative;
+  animation: drop 2s ease-in-out;
 }
-
-.content{
+@keyframes drop {
+  0% {
+    opacity: 0;
+    bottom: 1rem;
+  }
+  100% {
+    opacity: 1;
+    bottom: 0;
+  }
+}
+.content section h5 {
+  padding: 0 2rem;
+  margin: 1rem 0;
+}
+.content {
   width: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
+  top: -38rem;
+  left: 0;
+  animation: reveal 2s ease-in-out;
   /* align-items: center; */
+}
+.googleLogin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.8rem;
+  border: none;
+  border-radius: 3rem;
+  padding: 0.1rem;
+  cursor: pointer;
+  transition: 0.2s all ease-in-out;
+  width: 80%;
+  margin: 0 auto;
+  position: relative;
+}
+.googleLogin:active {
+  transform: scale(0.95, 0.95);
+  opacity: 0.5;
+  background-color: rgb(44, 44, 44);
+  color: whitesmoke;
+  box-shadow: black 0 0.5rem 1rem;
+}
+.roadAnimationContainer {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.roadAnimationContainer .car{
+  position: absolute;
+  top: -6.5rem;
+  z-index: 10000;
+  transform: rotate(180deg);
+  animation: carAnimation 2s infinite;
+}
+@keyframes carAnimation {
+  0%{
+    top: -6.8rem;
+  }
+  50%{
+    top: -6.5rem;
+  }
+  100%{
+    top:-6.8rem
+  }
+}
+.road {
+  height: 40rem;
+  width: 40rem;
+  position: relative; /* Changed to relative */
+  border-radius: 50%;
+  border: solid black 5rem;
+  animation: rotation 20s infinite linear;
+}
+
+.roadStripes {
+  height: 44.7rem;
+  width: 44.7rem;
+  position: relative; /* Changed to absolute */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: dashed white 0.3rem;
+  z-index: -1000;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg); /* Rotation only */
+  }
+  100% {
+    transform: rotate(360deg); /* Complete rotation */
+  }
+}
+
+.roadAnimationContainer {
+  top: 60rem;
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  animation: reveal 2s ease-in-out;
+}
+@keyframes reveal {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
