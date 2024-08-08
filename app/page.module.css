@@ -87,17 +87,20 @@
   top: -6.5rem;
   z-index: 10000;
   transform: rotate(180deg);
-  animation: carAnimation 2s infinite;
+  animation: carAnimation 1.5s infinite;
 }
 @keyframes carAnimation {
   0%{
     top: -6.8rem;
+    /* transform: rotate(178deg); */
   }
   50%{
     top: -6.5rem;
+    /* transform: rotate(183deg); */
   }
   100%{
-    top:-6.8rem
+    top:-6.8rem;
+    /* transform: rotate(178deg); */
   }
 }
 .road {
