@@ -22,6 +22,8 @@
   transform: rotate(10deg) scaleY(-1);
 }
 .content .logo {
+  position: relative;
+  top: -10rem;
   margin: 7rem auto 0 auto;
 }
 .content section {
@@ -83,10 +85,9 @@
   align-items: center;
 }
 .roadAnimationContainer .car{
-  position: absolute;
-  top: -6.5rem;
+  position:absolute;
   z-index: 10000;
-  transform: rotate(180deg);
+  transform: translateY(6rem);
   animation: carAnimation 1.5s infinite;
 }
 @keyframes carAnimation {
@@ -129,7 +130,7 @@
     transform: rotate(0deg); /* Rotation only */
   }
   100% {
-    transform: rotate(360deg); /* Complete rotation */
+    transform: rotate(-360deg); /* Complete rotation */
   }
 }
 
