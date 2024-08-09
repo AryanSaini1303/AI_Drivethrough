@@ -87,7 +87,7 @@
 .roadAnimationContainer .car{
   position:absolute;
   z-index: 10000;
-  transform: translateY(10vh);
+  transform: translateY(10.7vh);
   animation: carAnimation 1.5s infinite;
 }
 @keyframes carAnimation {
