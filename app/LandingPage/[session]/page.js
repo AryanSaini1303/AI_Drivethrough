@@ -9,7 +9,6 @@ export default function LandingPage({ params }) {
   useEffect(() => {
     setUserData(JSON.parse(decodeURIComponent(params.session)).user);
   }, []);
-  //   console.log(userData);
   return (
     <div className={style.wrapper}>
       <button
