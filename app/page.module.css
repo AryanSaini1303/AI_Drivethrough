@@ -5,6 +5,8 @@
   overflow: hidden;
   display: flex;
   justify-content: center;
+  background-color: #0A0D15;
+  color: white;
 }
 .blob1 {
   position: absolute;
@@ -13,6 +15,19 @@
   width: 20rem;
   margin: 0;
   padding: 0;
+  animation: blobdrop 1.5s forwards ease-in-out;
+}
+@keyframes blobdrop {
+  0%{
+    opacity: 0;
+    top: -14rem;
+    right: -8rem;
+  }
+  100%{
+    opacity: 1;
+    top: -12rem;
+    right: -6rem;
+  }
 }
 .blob2 {
   position: absolute;
@@ -20,11 +35,25 @@
   width: 20rem;
   left: -5rem;
   transform: rotate(10deg) scaleY(-1);
+  animation: blobrise 1.5s forwards ease-in-out;
+}
+@keyframes blobrise {
+  0%{
+    opacity: 0;
+    bottom: -14rem;
+    left: -7rem;
+  }
+  100%{
+    opacity: 1;
+    bottom: -12rem;
+    left: -5rem;
+  }
 }
 .content .logo {
   position: relative;
   top: -10rem;
   margin: 7rem auto 0 auto;
+  filter: drop-shadow(0 0 7rem #00ffff);
 }
 .content section {
   margin: 12rem 0;
@@ -68,6 +97,10 @@
   width: 80%;
   margin: 0 auto;
   position: relative;
+  background-color: #01161d ;
+  color: whitesmoke;
+  box-shadow: 0 0 1.5rem #00ffffc2;
+  border: solid #00ffff 1px;
 }
 .googleLogin:active {
   transform: scale(0.95, 0.95);
@@ -86,9 +119,10 @@
 }
 .roadAnimationContainer .car{
   position:absolute;
-  z-index: 10000;
+  z-index: 10000; 
   transform: translateY(10.7vh);
   animation: carAnimation 1.5s infinite;
+  filter: drop-shadow(-0.3rem 0rem 0.3rem rgba(255, 255, 255, 0.815));
 }
 @keyframes carAnimation {
   0%{
@@ -109,7 +143,8 @@
   width: 40rem;
   position: relative; /* Changed to relative */
   border-radius: 50%;
-  border: solid black 5rem;
+  border: solid #041f35 5rem;
+  box-shadow: 0 0 400rem #84dbdb88;
   animation: rotation 20s infinite linear;
 }
 
