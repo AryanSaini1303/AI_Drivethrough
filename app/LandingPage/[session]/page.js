@@ -16,11 +16,13 @@ export default function LandingPage({ params }) {
   const [userData, setUserData] = useState({});
   const { data: session, status } = useSession();
   const [map, setMap] = useState(null);
-  const [directionsResponse, setDirectionsResponse] = useState();
+  const [directionsResponse, setDirectionsResponse] = useState(null);
+  const [trafficLights, setTrafficLights] = useState([]);
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     libraries: ["places"],
   });
+
   const [centerlat, setCenterLat] = useState();
   const [centerlng, setCenterLng] = useState();
   const center = {
@@ -39,6 +41,9 @@ export default function LandingPage({ params }) {
 
   function getDirectionsResponse(response) {
     setDirectionsResponse(response);
+    // Extract approximate positions for traffic lights from the route
+    const trafficSignals = extractTrafficLightsFromRoute(response);
+    setTrafficLights(trafficSignals);
   }
 
   useEffect(() => {
@@ -56,16 +61,31 @@ export default function LandingPage({ params }) {
     return "Unauthenticated";
   }
 
+  // Function to extract approximate locations of traffic signals from the route
+  function extractTrafficLightsFromRoute(response) {
+    if(response){const trafficSignals = [];
+    const legs = response.routes[0].legs[0];
+    legs.steps.forEach((step) => {
+      if (step.maneuver && step.maneuver.includes("turn")) {
+        trafficSignals.push({
+          lat: step.end_location.lat(),
+          lng: step.end_location.lng(),
+        });
+      }
+    });
+    return trafficSignals;}
+  }
+
   // Dark mode styles for the map
   const mapStyles = [
     { elementType: "geometry", stylers: [{ color: "#212121" }] },
-    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+    { elementType: "labels.icon", stylers: [{ visibility: "on" }] },
     { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
     { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
     {
       featureType: "administrative",
       elementType: "geometry",
-      stylers: [{ visibility: "off" }], // Hide administrative boundaries
+      stylers: [{ visibility: "off" }],
     },
     {
       featureType: "administrative.country",
@@ -74,7 +94,7 @@ export default function LandingPage({ params }) {
     },
     {
       featureType: "administrative.land_parcel",
-      stylers: [{ visibility: "off" }], // Hide parcel boundaries
+      stylers: [{ visibility: "off" }],
     },
     {
       featureType: "administrative.locality",
@@ -109,7 +129,7 @@ export default function LandingPage({ params }) {
     {
       featureType: "road",
       elementType: "geometry.stroke",
-      stylers: [{ visibility: "off" }], // Hide road borders
+      stylers: [{ visibility: "off" }],
     },
     {
       featureType: "road",
@@ -178,23 +198,35 @@ export default function LandingPage({ params }) {
             streetViewControl: false,
             mapTypeControl: false,
             fullscreenControl: false,
-            styles: mapStyles, // Apply dark theme here
+            styles: mapStyles,
           }}
           onLoad={(map) => {
             setMap(map);
           }}
         >
           {directionsResponse && (
-            <DirectionsRenderer
-              directions={directionsResponse}
-              options={{
-                polylineOptions: {
-                  strokeColor: "blue", // Change this color to match your theme
-                  strokeOpacity: 0.8,
-                  strokeWeight: 5,
-                },
-              }}
-            />
+            <>
+              <DirectionsRenderer
+                directions={directionsResponse}
+                options={{
+                  polylineOptions: {
+                    strokeColor: "blue",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 5,
+                  },
+                }}
+              />
+              {trafficLights.map((signal, index) => (
+                <Marker
+                  key={index}
+                  position={signal}
+                  icon={{
+                    url: "/trafficLight.png",
+                    scaledSize: new window.google.maps.Size(36, 36),
+                  }}
+                />
+              ))}
+            </>
           )}
         </GoogleMap>
       </div>
