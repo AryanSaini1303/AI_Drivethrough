@@ -2,3 +2,13 @@ body{
     margin: 0;
     padding: 0;
 }
+/* Hide the Google logo */
+.gm-style-cc {
+    display: none;
+  }
+  
+  /* Hide the map terms and conditions */
+  .gm-fullscreen-control {
+    display: none;
+  }
+  
