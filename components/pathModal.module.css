@@ -1,0 +1,18 @@
+.container{
+    position: absolute;
+    top:25vh;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    z-index: 1;
+    border: solid white 2px;
+    border-radius: 5px;
+    backdrop-filter: blur(10px);
+    padding: 0.5rem 2rem;
+    color: white;
+}
+.container *{
+    margin: 0.5rem 0;
+}
+.infoSection h5{
+    margin: 0.5rem 0;
+}
