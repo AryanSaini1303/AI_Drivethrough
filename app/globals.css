@@ -1,14 +1,16 @@
-body{
-    margin: 0;
-    padding: 0;
+body {
+  margin: 0;
+  padding: 0;
 }
 /* Hide the Google logo */
 .gm-style-cc {
-    display: none;
-  }
-  
-  /* Hide the map terms and conditions */
-  .gm-fullscreen-control {
-    display: none;
-  }
-  
+  display: none;
+}
+
+/* Hide the map terms and conditions */
+.gm-fullscreen-control {
+  display: none;
+}
+.gm-style div:nth-child(14) img {
+  display: none;
+}
