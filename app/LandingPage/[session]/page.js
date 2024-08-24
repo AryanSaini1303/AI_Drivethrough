@@ -43,6 +43,7 @@ export default function LandingPage({ params }) {
   function getDirectionsResponse(response) {
     if (response) {
       setDirectionsResponse(response);
+      console.log(directionsResponse);
       // console.log(response.routes[0].bounds.ci.lo);
       setCenterLat(response.routes[0].bounds.ci.hi);
       setCenterLng(response.routes[0].bounds.Hh.hi);
@@ -50,6 +51,9 @@ export default function LandingPage({ params }) {
       // Extract approximate positions for traffic lights from the route
       const trafficSignals = extractTrafficLightsFromRoute(response);
       setTrafficLights(trafficSignals);
+    }
+    else{
+      setDirectionsResponse(response);
     }
   }
 

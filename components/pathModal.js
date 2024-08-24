@@ -13,6 +13,7 @@ export default function PathModal({ map, center, getDirectionsResponse }) {
   const destinationRef = useRef();
   useEffect(() => {
     getDirectionsResponse(directionsResponse);
+    console.log(directionsResponse);
   }, [directionsResponse]);
   async function calculateRoute(e) {
     e.preventDefault();
