@@ -29,21 +29,28 @@ export default function LandingPage({ params }) {
     lat: parseFloat(`${centerlat}`),
     lng: parseFloat(`${centerlng}`),
   };
+  // console.log(center);
   const geo = navigator.geolocation;
   geo.getCurrentPosition(getCoords);
 
   function getCoords(position) {
-    if (position) {
+    if (position && !directionsResponse) {
       setCenterLat(position.coords.latitude);
       setCenterLng(position.coords.longitude);
     }
   }
 
   function getDirectionsResponse(response) {
-    setDirectionsResponse(response);
-    // Extract approximate positions for traffic lights from the route
-    const trafficSignals = extractTrafficLightsFromRoute(response);
-    setTrafficLights(trafficSignals);
+    if (response) {
+      setDirectionsResponse(response);
+      // console.log(response.routes[0].bounds.ci.lo);
+      setCenterLat(response.routes[0].bounds.ci.hi);
+      setCenterLng(response.routes[0].bounds.Hh.hi);
+      // console.log(response.routes[0].bounds.Hh.lo);
+      // Extract approximate positions for traffic lights from the route
+      const trafficSignals = extractTrafficLightsFromRoute(response);
+      setTrafficLights(trafficSignals);
+    }
   }
 
   useEffect(() => {
@@ -63,17 +70,19 @@ export default function LandingPage({ params }) {
 
   // Function to extract approximate locations of traffic signals from the route
   function extractTrafficLightsFromRoute(response) {
-    if(response){const trafficSignals = [];
-    const legs = response.routes[0].legs[0];
-    legs.steps.forEach((step) => {
-      if (step.maneuver && step.maneuver.includes("turn")) {
-        trafficSignals.push({
-          lat: step.end_location.lat(),
-          lng: step.end_location.lng(),
-        });
-      }
-    });
-    return trafficSignals;}
+    if (response) {
+      const trafficSignals = [];
+      const legs = response.routes[0].legs[0];
+      legs.steps.forEach((step) => {
+        if (step.maneuver && step.maneuver.includes("turn")) {
+          trafficSignals.push({
+            lat: step.end_location.lat(),
+            lng: step.end_location.lng(),
+          });
+        }
+      });
+      return trafficSignals;
+    }
   }
 
   // Dark mode styles for the map

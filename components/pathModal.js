@@ -25,9 +25,10 @@ export default function PathModal({ map, center, getDirectionsResponse }) {
       destination: destinationRef.current.value,
       travelMode: google.maps.TravelMode.DRIVING,
     });
+    // console.log(results);
     setDirectionsResponse(results);
     setDistance(results.routes[0].legs[0].distance.text);
-    setDuration(results.routes[0].legs[0].duration.text);
+    setDuration(results.routes[0].legs[0].duration.text); 
   }
   function clearRoute() {
     setDirectionsResponse(null);
