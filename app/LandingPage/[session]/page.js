@@ -10,6 +10,47 @@ import {
   DirectionsRenderer,
 } from "@react-google-maps/api";
 import PathModal from "@/components/pathModal";
+import trafficData from "@/data/gurugram_traffic_data.json";
+
+/************************************************* */
+function isPointOnRoute(point, polyline, threshold) {
+  const toRadians = (degree) => (degree * Math.PI) / 180;
+
+  const haversineDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371e3;
+    const φ1 = toRadians(lat1);
+    const φ2 = toRadians(lat2);
+    const Δφ = toRadians(lat2 - lat1);
+    const Δλ = toRadians(lon2 - lon1);
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
+  };
+
+  for (let i = 0; i < polyline.length - 1; i++) {
+    const start = polyline[i];
+    const end = polyline[i + 1];
+
+    const d1 = haversineDistance(point.lat, point.lng, start.lat, start.lng);
+    const d2 = haversineDistance(point.lat, point.lng, end.lat, end.lng);
+    const segmentLength = haversineDistance(
+      start.lat,
+      start.lng,
+      end.lat,
+      end.lng
+    );
+
+    if (d1 + d2 <= segmentLength + threshold) {
+      return true;
+    }
+  }
+  return false;
+}
+/************************************************* */
 
 export default function LandingPage({ params }) {
   const router = useRouter();
@@ -25,6 +66,8 @@ export default function LandingPage({ params }) {
 
   const [centerlat, setCenterLat] = useState();
   const [centerlng, setCenterLng] = useState();
+  const [originCoordinates, setOriginCoordinates] = useState({});
+  const [destinationCoordinates, setDestinationCoordinates] = useState({});
   const center = {
     lat: parseFloat(`${centerlat}`),
     lng: parseFloat(`${centerlng}`),
@@ -43,16 +86,41 @@ export default function LandingPage({ params }) {
   function getDirectionsResponse(response) {
     if (response) {
       setDirectionsResponse(response);
-      console.log(directionsResponse);
-      // console.log(response.routes[0].bounds.ci.lo);
-      setCenterLat(response.routes[0].bounds.ci.hi);
-      setCenterLng(response.routes[0].bounds.Hh.hi);
-      // console.log(response.routes[0].bounds.Hh.lo);
-      // Extract approximate positions for traffic lights from the route
-      const trafficSignals = extractTrafficLightsFromRoute(response);
-      setTrafficLights(trafficSignals);
-    }
-    else{
+      /************steps to derive origin and destination coordinates************** */
+      const route = response.routes[0];
+      const origin = route.legs[0].start_location;
+      const destination = route.legs[0].end_location;
+      setOriginCoordinates({ lat: origin.lat(), lng: origin.lng() });
+      console.log(originCoordinates);
+      setDestinationCoordinates({
+        lat: destination.lat(),
+        lng: destination.lng(),
+      });
+      console.log(destinationCoordinates);
+      console.log(originCoordinates, destinationCoordinates);
+      /***********steps to derive origin and destination coordinates*************** */
+
+      /********************steps to find the traffic lights*********************** */
+      console.log(route);
+      const polyline = route.overview_path.map((point) => ({
+        lat: point.lat(),
+        lng: point.lng(),
+      }));
+      console.log(polyline);
+      const lightsOnRoute = trafficData.filter((light) =>
+        isPointOnRoute(
+          { lat: light.latitude, lng: light.longitude },
+          polyline,
+          50
+        )
+      );
+      setTrafficLights(lightsOnRoute);
+      console.log(trafficData.length);
+      console.log(trafficLights.length);
+      /********************steps to find the traffic lights*********************** */
+      setCenterLat(originCoordinates.lat);
+      setCenterLng(originCoordinates.lng);
+    } else {
       setDirectionsResponse(response);
     }
   }
@@ -70,23 +138,6 @@ export default function LandingPage({ params }) {
 
   if (status === "unauthenticated") {
     return "Unauthenticated";
-  }
-
-  // Function to extract approximate locations of traffic signals from the route
-  function extractTrafficLightsFromRoute(response) {
-    if (response) {
-      const trafficSignals = [];
-      const legs = response.routes[0].legs[0];
-      legs.steps.forEach((step) => {
-        if (step.maneuver && step.maneuver.includes("turn")) {
-          trafficSignals.push({
-            lat: step.end_location.lat(),
-            lng: step.end_location.lng(),
-          });
-        }
-      });
-      return trafficSignals;
-    }
   }
 
   // Dark mode styles for the map
@@ -232,10 +283,10 @@ export default function LandingPage({ params }) {
               {trafficLights.map((signal, index) => (
                 <Marker
                   key={index}
-                  position={signal}
+                  position={{ lat: signal.latitude, lng: signal.longitude }}
                   icon={{
                     url: "/trafficLight.png",
-                    scaledSize: new window.google.maps.Size(36, 36),
+                    scaledSize: new window.google.maps.Size(80, 80),
                   }}
                 />
               ))}
