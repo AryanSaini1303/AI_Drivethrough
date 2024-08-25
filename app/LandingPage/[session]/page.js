@@ -298,6 +298,7 @@ export default function LandingPage({ params }) {
             mapTypeControl: false,
             fullscreenControl: false,
             styles: mapStyles,
+            gestureHandling:"greedy",
           }}
           onLoad={(map) => {
             setMap(map);
@@ -329,8 +330,8 @@ export default function LandingPage({ params }) {
                 <Marker
                   position={carPosition}
                   icon={{
-                    url: "/car.png", // Replace with the path to your car icon
-                    scaledSize: new window.google.maps.Size(48, 48),
+                    url: "/navigationDot.png",
+                    scaledSize: new window.google.maps.Size(15, 15),
                   }}
                 />
               )}
