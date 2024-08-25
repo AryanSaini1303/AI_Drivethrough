@@ -130,7 +130,7 @@ export default function LandingPage({ params }) {
             setCarPosition({ lat: latitude, lng: longitude });
             setCenterLat(latitude);
             setCenterLng(longitude);
-            map.panTo(center);
+            // map.panTo(center);
           },
           (error) => {
             console.error("Error getting the user's position", error);
