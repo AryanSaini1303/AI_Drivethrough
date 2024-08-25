@@ -15,8 +15,8 @@ export const viewport = {
 };
 
 export const metadata = {
-  title: "IDP-Portal",
-  description: "Portal for Student's IDP Registration and Evaluation",
+  title: "AI-Drivethrough",
+  description: "Speed optimizer and classifier",
 };
 
 export default function RootLayout({ children }) {

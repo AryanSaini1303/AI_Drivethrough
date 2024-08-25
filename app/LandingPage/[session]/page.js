@@ -13,11 +13,12 @@ import PathModal from "@/components/pathModal";
 import trafficData from "@/data/gurugram_traffic_data.json";
 
 /************************************************* */
-function isPointOnRoute(point, polyline, threshold) {
+// Helper function to check if a point is on the route
+function isPointOnRoute(point, polyline, threshold = 50) {
   const toRadians = (degree) => (degree * Math.PI) / 180;
 
   const haversineDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371e3;
+    const R = 6371e3; // Earth's radius in meters
     const φ1 = toRadians(lat1);
     const φ2 = toRadians(lat2);
     const Δφ = toRadians(lat2 - lat1);
@@ -28,7 +29,7 @@ function isPointOnRoute(point, polyline, threshold) {
       Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c;
+    return R * c; // Distance in meters
   };
 
   for (let i = 0; i < polyline.length - 1; i++) {
@@ -59,22 +60,26 @@ export default function LandingPage({ params }) {
   const [map, setMap] = useState(null);
   const [directionsResponse, setDirectionsResponse] = useState(null);
   const [trafficLights, setTrafficLights] = useState([]);
+  const [carPosition, setCarPosition] = useState(null);
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     libraries: ["places"],
   });
 
-  const [centerlat, setCenterLat] = useState();
-  const [centerlng, setCenterLng] = useState();
+  const [centerlat, setCenterLat] = useState(null);
+  const [centerlng, setCenterLng] = useState(null);
   const [originCoordinates, setOriginCoordinates] = useState({});
   const [destinationCoordinates, setDestinationCoordinates] = useState({});
+
   const center = {
-    lat: parseFloat(`${centerlat}`),
-    lng: parseFloat(`${centerlng}`),
+    lat: centerlat ?? 28.4595, // Default to a known latitude if not set
+    lng: centerlng ?? 77.0266, // Default to a known longitude if not set
   };
-  // console.log(center);
-  const geo = navigator.geolocation;
-  geo.getCurrentPosition(getCoords);
+
+  useEffect(() => {
+    const geo = navigator.geolocation;
+    geo.getCurrentPosition(getCoords);
+  }, []);
 
   function getCoords(position) {
     if (position && !directionsResponse) {
@@ -86,42 +91,57 @@ export default function LandingPage({ params }) {
   function getDirectionsResponse(response) {
     if (response) {
       setDirectionsResponse(response);
-      /************steps to derive origin and destination coordinates************** */
+
       const route = response.routes[0];
       const origin = route.legs[0].start_location;
       const destination = route.legs[0].end_location;
-      setOriginCoordinates({ lat: origin.lat(), lng: origin.lng() });
-      console.log(originCoordinates);
-      setDestinationCoordinates({
-        lat: destination.lat(),
-        lng: destination.lng(),
-      });
-      console.log(destinationCoordinates);
-      console.log(originCoordinates, destinationCoordinates);
-      /***********steps to derive origin and destination coordinates*************** */
 
-      /********************steps to find the traffic lights*********************** */
-      console.log(route);
       const polyline = route.overview_path.map((point) => ({
         lat: point.lat(),
         lng: point.lng(),
       }));
-      console.log(polyline);
+
       const lightsOnRoute = trafficData.filter((light) =>
         isPointOnRoute(
           { lat: light.latitude, lng: light.longitude },
           polyline,
-          50
+          50 // Adjust this threshold as needed
         )
       );
+
       setTrafficLights(lightsOnRoute);
-      console.log(trafficData.length);
-      console.log(trafficLights.length);
-      /********************steps to find the traffic lights*********************** */
-      setCenterLat(originCoordinates.lat);
-      setCenterLng(originCoordinates.lng);
+      setOriginCoordinates({ lat: origin.lat(), lng: origin.lng() });
+      setDestinationCoordinates({
+        lat: destination.lat(),
+        lng: destination.lng(),
+      });
+      setCenterLat(origin.lat());
+      setCenterLng(origin.lng());
+    }
+  }
+
+  function startNavigation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setCarPosition({ lat: latitude, lng: longitude });
+  
+          // If you want the map to follow the car, uncomment the following:
+          // setCenterLat(latitude);
+          // setCenterLng(longitude);
+        },
+        (error) => {
+          console.error("Error getting the user's position", error);
+        },
+        {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+          timeout: 5000,
+        }
+      );
     } else {
-      setDirectionsResponse(response);
+      alert("Geolocation is not supported by this browser.");
     }
   }
 
@@ -140,7 +160,6 @@ export default function LandingPage({ params }) {
     return "Unauthenticated";
   }
 
-  // Dark mode styles for the map
   const mapStyles = [
     { elementType: "geometry", stylers: [{ color: "#212121" }] },
     { elementType: "labels.icon", stylers: [{ visibility: "on" }] },
@@ -248,6 +267,7 @@ export default function LandingPage({ params }) {
         >
           Sign Out
         </button>
+        <button onClick={startNavigation} style={{top:"2rem"}}>Start Navigation</button>
         <PathModal
           map={map}
           center={center}
@@ -290,6 +310,15 @@ export default function LandingPage({ params }) {
                   }}
                 />
               ))}
+              {carPosition && (
+                <Marker
+                  position={carPosition}
+                  icon={{
+                    url: "/car.png", // Replace with the path to your car icon
+                    scaledSize: new window.google.maps.Size(48, 48),
+                  }}
+                />
+              )}
             </>
           )}
         </GoogleMap>
@@ -297,3 +326,4 @@ export default function LandingPage({ params }) {
     )
   );
 }
+
