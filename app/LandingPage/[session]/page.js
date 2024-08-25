@@ -121,30 +121,29 @@ export default function LandingPage({ params }) {
   }
 
   function startNavigation() {
-    setCenterLat(carPosition.lat);
-    setCenterLng(carPosition.lng);
-    setNavigationFlag(true);
-    if (navigator.geolocation) {
-      navigator.geolocation.watchPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setCarPosition({ lat: latitude, lng: longitude });
-
-          // If you want the map to follow the car, uncomment the following:
-          // setCenterLat(latitude);
-          // setCenterLng(longitude);
-        },
-        (error) => {
-          console.error("Error getting the user's position", error);
-        },
-        {
-          enableHighAccuracy: true,
-          maximumAge: 0,
-          timeout: 5000,
-        }
-      );
-    } else {
-      alert("Geolocation is not supported by this browser.");
+    if (directionsResponse) {
+      setNavigationFlag(true);
+      if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            setCarPosition({ lat: latitude, lng: longitude });
+            setCenterLat(latitude);
+            setCenterLng(longitude);
+            map.panTo(center);
+          },
+          (error) => {
+            console.error("Error getting the user's position", error);
+          },
+          {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 5000,
+          }
+        );
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
     }
   }
 
@@ -158,18 +157,6 @@ export default function LandingPage({ params }) {
       }
     }, 1000);
   }, [status]);
-
-  useEffect(() => {
-    let timeout = setTimeout(() => {
-      if (navigationFlag) {
-        setCenterLat(carPosition.lat);
-        setCenterLng(carPosition.lng);
-        console.log(center);
-        map.panTo(center);
-      }
-    }, [1000]);
-    return clearInterval(timeout);
-  }, carPosition);
 
   if (status === "unauthenticated") {
     return "Unauthenticated";
