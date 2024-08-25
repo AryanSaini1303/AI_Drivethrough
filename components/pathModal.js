@@ -5,7 +5,7 @@ import styles from "./pathModal.module.css";
 import { Autocomplete } from "@react-google-maps/api";
 import { useEffect, useRef, useState } from "react";
 
-export default function PathModal({ map, center, getDirectionsResponse }) {
+export default function PathModal({ map, center, getDirectionsResponse, setNavigationFlag }) {
   const [directionsResponse, setDirectionsResponse] = useState(null);
   const [distance, setDistance] = useState("");
   const [duration, setDuration] = useState("");
@@ -32,6 +32,7 @@ export default function PathModal({ map, center, getDirectionsResponse }) {
     setDuration(results.routes[0].legs[0].duration.text); 
   }
   function clearRoute() {
+    setNavigationFlag(false);
     setDirectionsResponse(null);
     setDistance("");
     setDuration("");

@@ -65,12 +65,12 @@ export default function LandingPage({ params }) {
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     libraries: ["places"],
   });
-
+  console.log(carPosition);
   const [centerlat, setCenterLat] = useState(null);
   const [centerlng, setCenterLng] = useState(null);
   const [originCoordinates, setOriginCoordinates] = useState({});
   const [destinationCoordinates, setDestinationCoordinates] = useState({});
-
+  const [navigationFlag, setNavigationFlag] = useState(false);
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
@@ -121,12 +121,13 @@ export default function LandingPage({ params }) {
   }
 
   function startNavigation() {
+    setNavigationFlag(true);
     if (navigator.geolocation) {
       navigator.geolocation.watchPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           setCarPosition({ lat: latitude, lng: longitude });
-  
+
           // If you want the map to follow the car, uncomment the following:
           // setCenterLat(latitude);
           // setCenterLng(longitude);
@@ -155,6 +156,17 @@ export default function LandingPage({ params }) {
       }
     }, 1000);
   }, [status]);
+
+  useEffect(() => {
+    let timeout=setTimeout(() => {
+      if (navigationFlag) {
+        setCenterLat(carPosition.lat);
+        setCenterLng(carPosition.lng);
+        map.panTo(center);
+      }
+    }, [1000]);
+    return clearInterval(timeout);
+  }, carPosition);
 
   if (status === "unauthenticated") {
     return "Unauthenticated";
@@ -267,11 +279,14 @@ export default function LandingPage({ params }) {
         >
           Sign Out
         </button>
-        <button onClick={startNavigation} style={{top:"2rem"}}>Start Navigation</button>
+        <button onClick={startNavigation} style={{ top: "2rem" }}>
+          Start Navigation
+        </button>
         <PathModal
           map={map}
           center={center}
           getDirectionsResponse={getDirectionsResponse}
+          setNavigationFlag={setNavigationFlag}
         />
         <GoogleMap
           center={center}
@@ -326,4 +341,3 @@ export default function LandingPage({ params }) {
     )
   );
 }
-
