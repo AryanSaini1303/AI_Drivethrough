@@ -121,6 +121,8 @@ export default function LandingPage({ params }) {
   }
 
   function startNavigation() {
+    setCenterLat(carPosition.lat);
+    setCenterLng(carPosition.lng);
     setNavigationFlag(true);
     if (navigator.geolocation) {
       navigator.geolocation.watchPosition(
@@ -158,10 +160,11 @@ export default function LandingPage({ params }) {
   }, [status]);
 
   useEffect(() => {
-    let timeout=setTimeout(() => {
+    let timeout = setTimeout(() => {
       if (navigationFlag) {
         setCenterLat(carPosition.lat);
         setCenterLng(carPosition.lng);
+        console.log(center);
         map.panTo(center);
       }
     }, [1000]);
@@ -298,7 +301,7 @@ export default function LandingPage({ params }) {
             mapTypeControl: false,
             fullscreenControl: false,
             styles: mapStyles,
-            gestureHandling:"greedy",
+            gestureHandling: "greedy",
           }}
           onLoad={(map) => {
             setMap(map);
