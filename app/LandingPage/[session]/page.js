@@ -12,30 +12,24 @@ import {
 import PathModal from "@/components/pathModal";
 import trafficData from "@/data/gurugram_traffic_data.json";
 
-/************************************************* */
 // Helper function to check if a point is on the route
 function isPointOnRoute(point, polyline, threshold = 50) {
   const toRadians = (degree) => (degree * Math.PI) / 180;
-
   const haversineDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371e3; // Earth's radius in meters
     const φ1 = toRadians(lat1);
     const φ2 = toRadians(lat2);
     const Δφ = toRadians(lat2 - lat1);
     const Δλ = toRadians(lon2 - lon1);
-
     const a =
       Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
       Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
     return R * c; // Distance in meters
   };
-
   for (let i = 0; i < polyline.length - 1; i++) {
     const start = polyline[i];
     const end = polyline[i + 1];
-
     const d1 = haversineDistance(point.lat, point.lng, start.lat, start.lng);
     const d2 = haversineDistance(point.lat, point.lng, end.lat, end.lng);
     const segmentLength = haversineDistance(
@@ -44,14 +38,12 @@ function isPointOnRoute(point, polyline, threshold = 50) {
       end.lat,
       end.lng
     );
-
     if (d1 + d2 <= segmentLength + threshold) {
       return true;
     }
   }
   return false;
 }
-/************************************************* */
 
 export default function LandingPage({ params }) {
   const router = useRouter();
@@ -65,11 +57,8 @@ export default function LandingPage({ params }) {
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     libraries: ["places"],
   });
-  console.log(carPosition);
   const [centerlat, setCenterLat] = useState(null);
   const [centerlng, setCenterLng] = useState(null);
-  const [originCoordinates, setOriginCoordinates] = useState({});
-  const [destinationCoordinates, setDestinationCoordinates] = useState({});
   const [navigationFlag, setNavigationFlag] = useState(false);
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
@@ -91,16 +80,13 @@ export default function LandingPage({ params }) {
   function getDirectionsResponse(response) {
     if (response) {
       setDirectionsResponse1(response);
-
       const route = response.routes[0];
       const origin = route.legs[0].start_location;
       const destination = route.legs[0].end_location;
-
       const polyline = route.overview_path.map((point) => ({
         lat: point.lat(),
         lng: point.lng(),
       }));
-
       const lightsOnRoute = trafficData.filter((light) =>
         isPointOnRoute(
           { lat: light.latitude, lng: light.longitude },
@@ -108,18 +94,12 @@ export default function LandingPage({ params }) {
           50 // Adjust this threshold as needed
         )
       );
-
       setTrafficLights(lightsOnRoute);
-      setOriginCoordinates({ lat: origin.lat(), lng: origin.lng() });
-      setDestinationCoordinates({
-        lat: destination.lat(),
-        lng: destination.lng(),
-      });
       setCenterLat(origin.lat());
       setCenterLng(origin.lng());
     }
   }
-  console.log(directionsResponse1);
+
   function startNavigation() {
     if (directionsResponse1) {
       setNavigationFlag(true);
@@ -146,12 +126,14 @@ export default function LandingPage({ params }) {
       }
     }
   }
+
   useEffect(() => {
     if (!navigationFlag) {
       const geo = navigator.geolocation;
       geo.getCurrentPosition(getCoords);
     }
   }, [navigationFlag]);
+
   useEffect(() => {
     setUserData(JSON.parse(decodeURIComponent(params.session)).user);
     setTimeout(() => {

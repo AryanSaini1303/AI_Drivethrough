@@ -1,6 +1,6 @@
 "use client";
-import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+// import { signOut } from "next-auth/react";
+// import { useRouter } from "next/navigation";
 import styles from "./pathModal.module.css";
 import { Autocomplete } from "@react-google-maps/api";
 import { useEffect, useRef, useState } from "react";
@@ -11,11 +11,16 @@ export default function PathModal({ map, center, getDirectionsResponse, setNavig
   const [duration, setDuration] = useState("");
   const originRef = useRef();
   const destinationRef = useRef();
+
   useEffect(() => {
     getDirectionsResponse(directionsResponse);
     console.log(directionsResponse);
   }, [directionsResponse]);
+
   async function calculateRoute(e) {
+    setNavigationFlag(false);
+    setDirectionsResponse1(null);
+    setDirectionsResponse(null);
     e.preventDefault();
     if (originRef.current.value === "" || destinationRef.current.value === "") {
       return;
@@ -26,11 +31,11 @@ export default function PathModal({ map, center, getDirectionsResponse, setNavig
       destination: destinationRef.current.value,
       travelMode: google.maps.TravelMode.DRIVING,
     });
-    // console.log(results);
     setDirectionsResponse(results);
     setDistance(results.routes[0].legs[0].distance.text);
     setDuration(results.routes[0].legs[0].duration.text); 
   }
+
   function clearRoute() {
     setNavigationFlag(false);
     setDirectionsResponse1(null);
@@ -40,6 +45,7 @@ export default function PathModal({ map, center, getDirectionsResponse, setNavig
     originRef.current.value = "";
     destinationRef.current.value = "";
   }
+  
   return (
     <div className={styles.container}>
       <section className={styles.inputSection}>
