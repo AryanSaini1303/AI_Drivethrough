@@ -1,0 +1,79 @@
+.container{
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%,0%);
+    z-index: 1;
+    width: 100vw;
+    backdrop-filter: blur(10px);
+    /* border: solid white 2px; */
+    box-shadow: 0 0 15rem #00ffffc2;
+}
+.container form{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0.6rem 0;
+}
+.container form input{
+    width: 65vw;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    background-color: #988178;
+    /* background-color: white; */
+    border-radius: 10px;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    border: none;
+}
+.container form input::placeholder{
+    color: rgba(0, 0, 0, 0.575);
+}
+.container form .btns{
+    width: 70vw;
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+}
+.container form .btns button{
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    background-color: white;
+    border: none;
+    font-size: 0.65rem;
+    padding: 0.4rem;
+    border-radius: 10px;
+    background-color: #988178;
+    /* background-color: white; */
+    width: 100%;
+    transition: all 0.2s ease-in-out;
+}
+.btns button:active{
+    transform: scale(0.95,0.95);
+    opacity: 0.5;
+}
+.originInputContainer{
+    position: relative;
+}
+.originInputContainer button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.575);
+    border-radius: 50%;
+    border: none;
+    position: absolute;
+    padding: 0.3rem;
+    right: -2.5rem;
+    transform: translate(0,-50%);
+    animation: reveal 0.1s ease-in-out forwards;
+}
+@keyframes reveal {
+    0%{
+        top: 40%;
+        opacity: 0;
+    }
+    100%{
+        top:50%;
+        opacity:1;
+    }
+}

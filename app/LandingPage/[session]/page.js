@@ -9,8 +9,9 @@ import {
   Marker,
   DirectionsRenderer,
 } from "@react-google-maps/api";
-import PathModal from "@/components/pathModal";
+// import PathModal from "@/components/pathModal";
 import trafficData from "@/data/gurugram_traffic_data.json";
+import HeaderComponent from "@/components/headerComponent";
 
 // Helper function to check if a point is on the route
 function isPointOnRoute(point, polyline, threshold = 50) {
@@ -288,7 +289,7 @@ export default function LandingPage({ params }) {
     status !== "loading" &&
     isLoaded && (
       <div className={style.wrapper}>
-        <button
+        {/* <button
           onClick={() => {
             signOut({ callbackUrl: "/" }).then(() => router.push("/"));
           }}
@@ -297,16 +298,17 @@ export default function LandingPage({ params }) {
         </button>
         <button onClick={startNavigation} style={{ top: "2rem" }}>
           Start Navigation
-        </button>
-        <PathModal
-          map={map}
-          center={center}
+        </button> */}
+        <HeaderComponent
+          // map={map}
+          // center={center}
           getDirectionsResponse={getDirectionsResponse}
           setNavigationFlag={setNavigationFlag}
           setDirectionsResponse1={setDirectionsResponse1}
           watchId={watchId}
           setWatchId={setWatchId}
         />
+
         <GoogleMap
           center={center}
           zoom={15}
