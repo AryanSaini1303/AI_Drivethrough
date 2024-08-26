@@ -58,7 +58,7 @@ export default function LandingPage({ params }) {
   const [userData, setUserData] = useState({});
   const { data: session, status } = useSession();
   const [map, setMap] = useState(null);
-  const [directionsResponse, setDirectionsResponse] = useState(null);
+  const [directionsResponse1, setDirectionsResponse1] = useState(null);
   const [trafficLights, setTrafficLights] = useState([]);
   const [carPosition, setCarPosition] = useState(null);
   const { isLoaded } = useJsApiLoader({
@@ -82,7 +82,7 @@ export default function LandingPage({ params }) {
   }, []);
 
   function getCoords(position) {
-    if (position && !directionsResponse) {
+    if (position && !directionsResponse1) {
       setCenterLat(position.coords.latitude);
       setCenterLng(position.coords.longitude);
     }
@@ -90,7 +90,7 @@ export default function LandingPage({ params }) {
 
   function getDirectionsResponse(response) {
     if (response) {
-      setDirectionsResponse(response);
+      setDirectionsResponse1(response);
 
       const route = response.routes[0];
       const origin = route.legs[0].start_location;
@@ -119,9 +119,9 @@ export default function LandingPage({ params }) {
       setCenterLng(origin.lng());
     }
   }
-
+  console.log(directionsResponse1);
   function startNavigation() {
-    if (directionsResponse) {
+    if (directionsResponse1) {
       setNavigationFlag(true);
       if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
@@ -146,7 +146,12 @@ export default function LandingPage({ params }) {
       }
     }
   }
-
+  useEffect(() => {
+    if (!navigationFlag) {
+      const geo = navigator.geolocation;
+      geo.getCurrentPosition(getCoords);
+    }
+  }, [navigationFlag]);
   useEffect(() => {
     setUserData(JSON.parse(decodeURIComponent(params.session)).user);
     setTimeout(() => {
@@ -157,7 +162,6 @@ export default function LandingPage({ params }) {
       }
     }, 1000);
   }, [status]);
-
   if (status === "unauthenticated") {
     return "Unauthenticated";
   }
@@ -277,6 +281,7 @@ export default function LandingPage({ params }) {
           center={center}
           getDirectionsResponse={getDirectionsResponse}
           setNavigationFlag={setNavigationFlag}
+          setDirectionsResponse1={setDirectionsResponse1}
         />
         <GoogleMap
           center={center}
@@ -294,10 +299,10 @@ export default function LandingPage({ params }) {
             setMap(map);
           }}
         >
-          {directionsResponse && (
+          {directionsResponse1 && (
             <>
               <DirectionsRenderer
-                directions={directionsResponse}
+                directions={directionsResponse1}
                 options={{
                   polylineOptions: {
                     strokeColor: "blue",
@@ -316,7 +321,7 @@ export default function LandingPage({ params }) {
                   }}
                 />
               ))}
-              {carPosition && (
+              {navigationFlag && carPosition && (
                 <Marker
                   position={carPosition}
                   icon={{
