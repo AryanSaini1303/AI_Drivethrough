@@ -60,6 +60,7 @@ export default function LandingPage({ params }) {
   const [centerlat, setCenterLat] = useState(null);
   const [centerlng, setCenterLng] = useState(null);
   const [navigationFlag, setNavigationFlag] = useState(false);
+  const [watchId, setWatchId] = useState(null);
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
@@ -103,27 +104,66 @@ export default function LandingPage({ params }) {
   function startNavigation() {
     if (directionsResponse1) {
       setNavigationFlag(true);
+      // Stop any previous geolocation watch
+      if (watchId) {
+        navigator.geolocation.clearWatch(watchId);
+        setWatchId(null);
+      }
       if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(
+        const id = navigator.geolocation.watchPosition(
           (position) => {
             const { latitude, longitude } = position.coords;
+            // Update the car's position on the map
             setCarPosition({ lat: latitude, lng: longitude });
+            // Center the map on the car's position
             setCenterLat(latitude);
             setCenterLng(longitude);
             // map.panTo(center);
           },
           (error) => {
-            console.error("Error getting the user's position", error);
+            handleGeolocationError(error);
           },
           {
             enableHighAccuracy: true,
             maximumAge: 0,
-            timeout: 5000,
+            timeout: 10000, // Increased timeout to 10 seconds
           }
         );
+        // Store the watchId so it can be cleared later
+        setWatchId(id);
       } else {
         alert("Geolocation is not supported by this browser.");
       }
+    }
+  }
+
+  // Error handling function
+  function handleGeolocationError(error) {
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        console.error("User denied the request for Geolocation.");
+        alert("Please enable location permissions to use this feature.");
+        break;
+      case error.POSITION_UNAVAILABLE:
+        console.error("Location information is unavailable.");
+        alert(
+          "Location information is currently unavailable. Please try again later."
+        );
+        break;
+      case error.TIMEOUT:
+        console.error("The request to get user location timed out.");
+        alert(
+          "Unable to retrieve location. The request timed out. Please try again."
+        );
+        break;
+      case error.UNKNOWN_ERROR:
+        console.error("An unknown error occurred.");
+        alert("An unknown error occurred while retrieving location.");
+        break;
+      default:
+        console.error("An unexpected error occurred.");
+        alert("An unexpected error occurred. Please try again.");
+        break;
     }
   }
 
@@ -264,6 +304,8 @@ export default function LandingPage({ params }) {
           getDirectionsResponse={getDirectionsResponse}
           setNavigationFlag={setNavigationFlag}
           setDirectionsResponse1={setDirectionsResponse1}
+          watchId={watchId}
+          setWatchId={setWatchId}
         />
         <GoogleMap
           center={center}

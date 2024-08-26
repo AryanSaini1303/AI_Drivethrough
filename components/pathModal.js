@@ -1,16 +1,23 @@
 "use client";
-// import { signOut } from "next-auth/react";
-// import { useRouter } from "next/navigation";
 import styles from "./pathModal.module.css";
 import { Autocomplete } from "@react-google-maps/api";
 import { useEffect, useRef, useState } from "react";
 
-export default function PathModal({ map, center, getDirectionsResponse, setNavigationFlag, setDirectionsResponse1 }) {
+export default function PathModal({
+  map,
+  center,
+  getDirectionsResponse,
+  setNavigationFlag,
+  setDirectionsResponse1,
+  watchId,
+  setWatchId
+}) {
   const [directionsResponse, setDirectionsResponse] = useState(null);
   const [distance, setDistance] = useState("");
   const [duration, setDuration] = useState("");
   const originRef = useRef();
   const destinationRef = useRef();
+  const [originInputFlag, setOriginInputFlag] = useState(false);
 
   useEffect(() => {
     getDirectionsResponse(directionsResponse);
@@ -33,7 +40,7 @@ export default function PathModal({ map, center, getDirectionsResponse, setNavig
     });
     setDirectionsResponse(results);
     setDistance(results.routes[0].legs[0].distance.text);
-    setDuration(results.routes[0].legs[0].duration.text); 
+    setDuration(results.routes[0].legs[0].duration.text);
   }
 
   function clearRoute() {
@@ -44,8 +51,25 @@ export default function PathModal({ map, center, getDirectionsResponse, setNavig
     setDuration("");
     originRef.current.value = "";
     destinationRef.current.value = "";
+    // Stop the geolocation watch if it exists
+    if (watchId) {
+      navigator.geolocation.clearWatch(watchId);
+      setWatchId(null); // Reset the watchId
+    }
   }
   
+
+  function getCoords(position) {
+    if (position && !directionsResponse) {
+      originRef.current.value = `${position.coords.latitude},${position.coords.longitude}`;
+    }
+  }
+  
+  function handleLocationClick() {
+    const geo = navigator.geolocation;
+    geo.getCurrentPosition(getCoords);
+  }
+
   return (
     <div className={styles.container}>
       <section className={styles.inputSection}>
@@ -54,22 +78,48 @@ export default function PathModal({ map, center, getDirectionsResponse, setNavig
             <input
               type="text"
               name="Origin"
-              id=""
               placeholder="Origin"
               ref={originRef}
+              onFocus={() => {
+                setOriginInputFlag(true);
+              }}
             />
           </Autocomplete>
+          {originInputFlag && (
+            <button
+              type="button"
+              style={{ width: "fit-content" }}
+              onClick={handleLocationClick}
+            >
+              currLoc
+            </button>
+          )}
           <Autocomplete>
             <input
               type="text"
               name="Destination"
-              id=""
               placeholder="Destination"
               ref={destinationRef}
+              onFocus={() => {
+                setOriginInputFlag(false);
+              }}
             />
           </Autocomplete>
-          <button type="submit">Calculate Route</button>
-          <button type="button" onClick={clearRoute}>
+          <button
+            type="submit"
+            onFocus={() => {
+              setOriginInputFlag(false);
+            }}
+          >
+            Calculate Route
+          </button>
+          <button
+            type="button"
+            onClick={clearRoute}
+            onFocus={() => {
+              setOriginInputFlag(false);
+            }}
+          >
             clear
           </button>
         </form>
