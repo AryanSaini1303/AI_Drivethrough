@@ -4,9 +4,9 @@
     transform: translate(-50%,0%);
     z-index: 1;
     width: 100vw;
-    backdrop-filter: blur(10px);
+    /* backdrop-filter: blur(10px); */
     /* border: solid white 2px; */
-    box-shadow: 0 0 15rem #00ffffc2;
+    /* box-shadow: 0 0 15rem #00ffffc2; */
 }
 .container form{
     width: 100%;
@@ -18,11 +18,11 @@
 }
 .container form input{
     width: 65vw;
-    font-size: 0.8rem;
-    padding: 0.3rem 0.6rem;
-    background-color: #988178;
+    font-size: 0.7rem;
+    padding: 0.6rem 0.8rem;
+    background-color: white;
     /* background-color: white; */
-    border-radius: 10px;
+    border-radius: 15px;
     font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     border: none;
 }
@@ -41,9 +41,10 @@
     border: none;
     font-size: 0.65rem;
     padding: 0.4rem;
-    border-radius: 10px;
-    background-color: #988178;
+    border-radius: 5px;
+    background-color: white;
     /* background-color: white; */
+    font-weight: bold;
     width: 100%;
     transition: all 0.2s ease-in-out;
 }
@@ -58,7 +59,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.575);
+    background-color: rgba(0, 0, 0, 0.858);
     border-radius: 50%;
     border: none;
     position: absolute;
@@ -76,4 +77,56 @@
         top:50%;
         opacity:1;
     }
+}
+.logo{
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    left: -2rem;
+    gap: 0.2rem;
+}
+.mainDot{
+    height: 1.2rem;
+    width: 1.2rem;
+    background-color: #7DC2E2;
+    border-radius: 50%;
+    position: relative;
+}
+.mainDot::before{
+    content:'';
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: white;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    height: 0.8rem;
+    width: 0.8rem;
+    z-index: 1;
+    border-radius: 50%;
+}
+.dot{
+    height: 0.4rem;
+    width: 0.4rem;
+    background-color: white;
+    border-radius: 50%;
+}
+.destinationInputContainer{
+    display: flex;
+    position: relative;
+}
+.destinationInputContainer button{
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translate(115%,-50%);
+    border-radius: 50%;
+    padding: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: reveal 0.2s ease-in-out forwards;
 }
