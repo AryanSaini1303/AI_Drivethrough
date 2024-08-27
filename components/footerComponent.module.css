@@ -1,0 +1,48 @@
+.container {
+  z-index: 10000;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 100vw;
+  display: flex;
+  justify-content: space-around;
+  padding: 1rem 0;
+  backdrop-filter: blur(10px);
+}
+.container button{
+    transition: all 0.1s ease-in-out;
+}
+.container button:nth-child(1) {
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.35rem 0.45rem;
+  background-color: black;
+  border-radius: 50%;
+}
+.container button:nth-child(2) {
+  border-radius: 10px;
+  border: none;
+  padding: 0 1rem;
+  background-color: black;
+  color: white;
+  font-size: 0.9rem;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+  letter-spacing: 0.05rem;
+  font-weight: 600;
+}
+.container button:nth-child(3) {
+  border: none;
+  background-color: black;
+  padding: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+}
+.container button:active {
+  transform: scale(0.95, 0.95);
+  opacity: 0.5;
+}

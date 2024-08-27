@@ -12,6 +12,7 @@ import {
 // import PathModal from "@/components/pathModal";
 import trafficData from "@/data/gurugram_traffic_data.json";
 import HeaderComponent from "@/components/headerComponent";
+import FooterComponent from "@/components/footerComponent";
 
 // Helper function to check if a point is on the route
 function isPointOnRoute(point, polyline, threshold = 50) {
@@ -62,6 +63,7 @@ export default function LandingPage({ params }) {
   const [centerlng, setCenterLng] = useState(null);
   const [navigationFlag, setNavigationFlag] = useState(false);
   const [watchId, setWatchId] = useState(null);
+  const [clearRouteFlag, setClearRouteFlag] = useState(false);
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
@@ -99,72 +101,6 @@ export default function LandingPage({ params }) {
       setTrafficLights(lightsOnRoute);
       setCenterLat(origin.lat());
       setCenterLng(origin.lng());
-    }
-  }
-
-  function startNavigation() {
-    if (directionsResponse1) {
-      setNavigationFlag(true);
-      // Stop any previous geolocation watch
-      if (watchId) {
-        navigator.geolocation.clearWatch(watchId);
-        setWatchId(null);
-      }
-      if (navigator.geolocation) {
-        const id = navigator.geolocation.watchPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            // Update the car's position on the map
-            setCarPosition({ lat: latitude, lng: longitude });
-            // Center the map on the car's position
-            setCenterLat(latitude);
-            setCenterLng(longitude);
-            // map.panTo(center);
-          },
-          (error) => {
-            handleGeolocationError(error);
-          },
-          {
-            enableHighAccuracy: true,
-            maximumAge: 0,
-            timeout: 10000, // Increased timeout to 10 seconds
-          }
-        );
-        // Store the watchId so it can be cleared later
-        setWatchId(id);
-      } else {
-        alert("Geolocation is not supported by this browser.");
-      }
-    }
-  }
-
-  // Error handling function
-  function handleGeolocationError(error) {
-    switch (error.code) {
-      case error.PERMISSION_DENIED:
-        console.error("User denied the request for Geolocation.");
-        alert("Please enable location permissions to use this feature.");
-        break;
-      case error.POSITION_UNAVAILABLE:
-        console.error("Location information is unavailable.");
-        alert(
-          "Location information is currently unavailable. Please try again later."
-        );
-        break;
-      case error.TIMEOUT:
-        console.error("The request to get user location timed out.");
-        alert(
-          "Unable to retrieve location. The request timed out. Please try again."
-        );
-        break;
-      case error.UNKNOWN_ERROR:
-        console.error("An unknown error occurred.");
-        alert("An unknown error occurred while retrieving location.");
-        break;
-      default:
-        console.error("An unexpected error occurred.");
-        alert("An unexpected error occurred. Please try again.");
-        break;
     }
   }
 
@@ -289,7 +225,7 @@ export default function LandingPage({ params }) {
     status !== "loading" &&
     isLoaded && (
       <div className={style.wrapper}>
-        <button
+        {/* <button
           onClick={() => {
             signOut({ callbackUrl: "/" }).then(() => router.push("/"));
           }}
@@ -299,15 +235,15 @@ export default function LandingPage({ params }) {
         </button>
         <button onClick={startNavigation} style={{ top: "2rem", zIndex:'1000'}}>
           Start Navigation
-        </button>
+        </button> */}
         <HeaderComponent
-          // map={map}
-          // center={center}
           getDirectionsResponse={getDirectionsResponse}
           setNavigationFlag={setNavigationFlag}
           setDirectionsResponse1={setDirectionsResponse1}
           watchId={watchId}
           setWatchId={setWatchId}
+          clearRouteFlag={clearRouteFlag}
+          setClearRouteFlag={setClearRouteFlag}
         />
 
         <GoogleMap
@@ -360,6 +296,20 @@ export default function LandingPage({ params }) {
             </>
           )}
         </GoogleMap>
+        <FooterComponent
+          map={map}
+          center={center}
+          directionsResponse1={directionsResponse1}
+          setCenterLat={setCenterLat}
+          setCenterLng={setCenterLng}
+          watchId={watchId}
+          setWatchId={setWatchId}
+          setCarPosition={setCarPosition}
+          setNavigationFlag={setNavigationFlag}
+          navigationFlag={navigationFlag}
+          setDirectionsResponse1={setDirectionsResponse1}
+          setClearRouteFlag={setClearRouteFlag}
+        />
       </div>
     )
   );
