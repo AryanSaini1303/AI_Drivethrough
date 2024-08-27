@@ -15,3 +15,10 @@ body {
 .gm-style div:nth-child(14) img {
   display: none;
 }
+.pac-container {
+  z-index: 10300 !important; /* Ensure the dropdown appears above everything */
+  background: white; /* Ensure dropdown is visible */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for better visibility */
+  /* border-radius: 0 0 10px 10px; */
+  border-radius: 10px;
+}
