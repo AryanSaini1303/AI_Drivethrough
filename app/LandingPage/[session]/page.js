@@ -13,6 +13,7 @@ import {
 import trafficData from "@/data/gurugram_traffic_data.json";
 import HeaderComponent from "@/components/headerComponent";
 import FooterComponent from "@/components/footerComponent";
+import LandingPageLoader from "@/components/landingPageLoader";
 
 // Helper function to check if a point is on the route
 function isPointOnRoute(point, polyline, threshold = 50) {
@@ -64,23 +65,20 @@ export default function LandingPage({ params }) {
   const [navigationFlag, setNavigationFlag] = useState(false);
   const [watchId, setWatchId] = useState(null);
   const [clearRouteFlag, setClearRouteFlag] = useState(false);
+  const [optimizing,setOptimizing]=useState(false);
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
   };
 
-  useEffect(() => {
-    const geo = navigator.geolocation;
-    geo.getCurrentPosition(getCoords);
-  }, []);
-
+  
   function getCoords(position) {
     if (position && !directionsResponse1) {
       setCenterLat(position.coords.latitude);
       setCenterLng(position.coords.longitude);
     }
   }
-
+  
   function getDirectionsResponse(response) {
     if (response) {
       setDirectionsResponse1(response);
@@ -104,12 +102,9 @@ export default function LandingPage({ params }) {
     }
   }
 
-  useEffect(() => {
-    if (!navigationFlag) {
-      const geo = navigator.geolocation;
-      geo.getCurrentPosition(getCoords);
-    }
-  }, [navigationFlag]);
+  function getOptimizing(flag){
+    setOptimizing(flag);
+  }
 
   useEffect(() => {
     setUserData(JSON.parse(decodeURIComponent(params.session)).user);
@@ -121,10 +116,20 @@ export default function LandingPage({ params }) {
       }
     }, 1000);
   }, [status]);
+
+  useEffect(() => {
+    const geo = navigator.geolocation;
+    geo.getCurrentPosition(getCoords);
+  }, []);
+
+  useEffect(() => {
+    setCarPosition(null);
+  }, [clearRouteFlag]);
+
   if (status === "unauthenticated") {
     return "Unauthenticated";
   }
-
+  
   const mapStyles = [
     { elementType: "geometry", stylers: [{ color: "#212121" }] },
     { elementType: "labels.icon", stylers: [{ visibility: "on" }] },
@@ -225,6 +230,11 @@ export default function LandingPage({ params }) {
     status !== "loading" &&
     isLoaded && (
       <div className={style.wrapper}>
+        {optimizing && (
+          <div className={style.loadingShade}>
+            <LandingPageLoader />
+          </div>
+        )}
         {/* <button
           onClick={() => {
             signOut({ callbackUrl: "/" }).then(() => router.push("/"));
@@ -232,9 +242,6 @@ export default function LandingPage({ params }) {
           style={{zIndex:'1000'}}
         >
           Sign Out
-        </button>
-        <button onClick={startNavigation} style={{ top: "2rem", zIndex:'1000'}}>
-          Start Navigation
         </button> */}
         <HeaderComponent
           getDirectionsResponse={getDirectionsResponse}
@@ -274,7 +281,7 @@ export default function LandingPage({ params }) {
                   },
                 }}
               />
-              {trafficLights.map((signal, index) => (
+              {carPosition&&trafficLights.map((signal, index) => (
                 <Marker
                   key={index}
                   position={{ lat: signal.latitude, lng: signal.longitude }}
@@ -309,6 +316,7 @@ export default function LandingPage({ params }) {
           navigationFlag={navigationFlag}
           setDirectionsResponse1={setDirectionsResponse1}
           setClearRouteFlag={setClearRouteFlag}
+          getOptimizing={getOptimizing}
         />
       </div>
     )

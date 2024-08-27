@@ -7,11 +7,36 @@
   width: 100vw;
   display: flex;
   justify-content: space-around;
-  padding: 1rem 0;
+  padding: 0.6rem 0;
   backdrop-filter: blur(10px);
+  /* background-color: rgba(0, 0, 0, 0.651); */
 }
-.container button{
-    transition: all 0.1s ease-in-out;
+.container .loadingShade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: #009900;
+  z-index: 100;
+  width: 0%; /* Start with 0 width */
+}
+
+.container .loading {
+  animation: loading var(--animation-duration, 5s) cubic-bezier(0.42, 0.0, 0.58, 1.0) forwards;
+}
+
+@keyframes loading {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.container button {
+  transition: all 0.1s ease-in-out;
+  z-index: 1000;
 }
 .container button:nth-child(1) {
   border: none;
