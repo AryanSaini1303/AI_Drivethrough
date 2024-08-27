@@ -7,7 +7,9 @@ export default function HeaderComponent({
   setNavigationFlag,
   setDirectionsResponse1,
   clearRouteFlag,
-  setClearRouteFlag
+  setClearRouteFlag,
+  optimizing,
+  carPosition
 }) {
   const originRef = useRef();
   const destinationRef = useRef();
@@ -138,7 +140,7 @@ export default function HeaderComponent({
               // }}
             />
           </Autocomplete>
-          {destinationInputFlag && (
+          {destinationInputFlag&&!optimizing&&carPosition===null && (
             <button type="submit" onClick={calculateRoute}>
               <svg
                 baseProfile="tiny"

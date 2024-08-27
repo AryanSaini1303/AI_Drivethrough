@@ -251,6 +251,8 @@ export default function LandingPage({ params }) {
           setWatchId={setWatchId}
           clearRouteFlag={clearRouteFlag}
           setClearRouteFlag={setClearRouteFlag}
+          optimizing={optimizing}
+          carPosition={carPosition}// if we have carPosition then it means that the journey is optimized
         />
 
         <GoogleMap
