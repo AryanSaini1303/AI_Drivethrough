@@ -289,16 +289,17 @@ export default function LandingPage({ params }) {
     status !== "loading" &&
     isLoaded && (
       <div className={style.wrapper}>
-        {/* <button
+        <button
           onClick={() => {
             signOut({ callbackUrl: "/" }).then(() => router.push("/"));
           }}
+          style={{zIndex:'1000'}}
         >
           Sign Out
         </button>
-        <button onClick={startNavigation} style={{ top: "2rem" }}>
+        <button onClick={startNavigation} style={{ top: "2rem", zIndex:'1000'}}>
           Start Navigation
-        </button> */}
+        </button>
         <HeaderComponent
           // map={map}
           // center={center}
