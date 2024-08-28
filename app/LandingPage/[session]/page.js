@@ -110,7 +110,7 @@ export default function LandingPage({ params }) {
   }
 
   useEffect(() => {
-    setInterval(() => {
+    setTimeout(() => {
       if (directionsResponse1) {
         const route = directionsResponse1.routes[0];
         const origin = route.legs[0].start_location;
