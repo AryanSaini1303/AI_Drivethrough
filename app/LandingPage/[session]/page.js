@@ -9,8 +9,7 @@ import {
   Marker,
   DirectionsRenderer,
 } from "@react-google-maps/api";
-// import PathModal from "@/components/pathModal";
-import trafficData from "@/data/gurugram_traffic_data.json";
+import trafficData from "@/data/cleaned_data.json";
 import HeaderComponent from "@/components/headerComponent";
 import FooterComponent from "@/components/footerComponent";
 import LandingPageLoader from "@/components/landingPageLoader";
@@ -70,7 +69,8 @@ export default function LandingPage({ params }) {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
   };
-console.log(navigationFlag);
+
+  // Get current position of the user
   function getCoords(position) {
     if (position && !directionsResponse1) {
       setCenterLat(position.coords.latitude);
@@ -78,12 +78,20 @@ console.log(navigationFlag);
     }
   }
 
+  function chunkArray(array, chunkSize) {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, i + chunkSize));
+    }
+    return chunks;
+  }
+
+  // Handle response from Google Directions API
   function getDirectionsResponse(response) {
     if (response) {
       setDirectionsResponse1(response);
       const route = response.routes[0];
       const origin = route.legs[0].start_location;
-      const destination = route.legs[0].end_location;
       const polyline = route.overview_path.map((point) => ({
         lat: point.lat(),
         lng: point.lng(),
@@ -98,6 +106,39 @@ console.log(navigationFlag);
       setTrafficLights(lightsOnRoute);
       setCenterLat(origin.lat());
       setCenterLng(origin.lng());
+      // Calculate distance from user to each traffic light
+      const userLocation = new google.maps.LatLng(origin.lat(), origin.lng());
+      const service = new google.maps.DistanceMatrixService();
+      const maxDestinations = 25; // Google Maps API limit
+      const destinationChunks = chunkArray(lightsOnRoute, maxDestinations);
+      // Process each chunk separately
+      destinationChunks.forEach((chunk, chunkIndex) => {
+        const destinations = chunk.map(
+          (signal) => new google.maps.LatLng(signal.latitude, signal.longitude)
+        );
+        service.getDistanceMatrix(
+          {
+            origins: [userLocation],
+            destinations: destinations,
+            travelMode: google.maps.TravelMode.DRIVING,
+          },
+          (response, status) => {
+            if (status === "OK") {
+              const results = response.rows[0].elements;
+              results.forEach((result, index) => {
+                console.log(
+                  `Distance to Traffic Signal ${
+                    chunkIndex * maxDestinations + index + 1
+                  }: ${result.distance.text} (${result.duration.text})`
+                );
+              });
+              alert(results.length);
+            } else {
+              console.error("DistanceMatrixService failed due to: " + status);
+            }
+          }
+        );
+      });
     }
   }
 
@@ -234,14 +275,6 @@ console.log(navigationFlag);
             <LandingPageLoader />
           </div>
         )}
-        {/* <button
-          onClick={() => {
-            signOut({ callbackUrl: "/" }).then(() => router.push("/"));
-          }}
-          style={{zIndex:'1000'}}
-        >
-          Sign Out
-        </button> */}
         <HeaderComponent
           getDirectionsResponse={getDirectionsResponse}
           setNavigationFlag={setNavigationFlag}
@@ -251,7 +284,7 @@ console.log(navigationFlag);
           clearRouteFlag={clearRouteFlag}
           setClearRouteFlag={setClearRouteFlag}
           optimizing={optimizing}
-          carPosition={carPosition} // if we have carPosition then it means that the journey is optimized
+          carPosition={carPosition}
         />
 
         <GoogleMap
