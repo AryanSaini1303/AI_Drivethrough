@@ -65,20 +65,19 @@ export default function LandingPage({ params }) {
   const [navigationFlag, setNavigationFlag] = useState(false);
   const [watchId, setWatchId] = useState(null);
   const [clearRouteFlag, setClearRouteFlag] = useState(false);
-  const [optimizing,setOptimizing]=useState(false);
+  const [optimizing, setOptimizing] = useState(false);
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
   };
-
-  
+console.log(navigationFlag);
   function getCoords(position) {
     if (position && !directionsResponse1) {
       setCenterLat(position.coords.latitude);
       setCenterLng(position.coords.longitude);
     }
   }
-  
+
   function getDirectionsResponse(response) {
     if (response) {
       setDirectionsResponse1(response);
@@ -102,7 +101,7 @@ export default function LandingPage({ params }) {
     }
   }
 
-  function getOptimizing(flag){
+  function getOptimizing(flag) {
     setOptimizing(flag);
   }
 
@@ -129,7 +128,7 @@ export default function LandingPage({ params }) {
   if (status === "unauthenticated") {
     return "Unauthenticated";
   }
-  
+
   const mapStyles = [
     { elementType: "geometry", stylers: [{ color: "#212121" }] },
     { elementType: "labels.icon", stylers: [{ visibility: "on" }] },
@@ -252,7 +251,7 @@ export default function LandingPage({ params }) {
           clearRouteFlag={clearRouteFlag}
           setClearRouteFlag={setClearRouteFlag}
           optimizing={optimizing}
-          carPosition={carPosition}// if we have carPosition then it means that the journey is optimized
+          carPosition={carPosition} // if we have carPosition then it means that the journey is optimized
         />
 
         <GoogleMap
@@ -283,16 +282,17 @@ export default function LandingPage({ params }) {
                   },
                 }}
               />
-              {carPosition&&trafficLights.map((signal, index) => (
-                <Marker
-                  key={index}
-                  position={{ lat: signal.latitude, lng: signal.longitude }}
-                  icon={{
-                    url: "/trafficLight.png",
-                    scaledSize: new window.google.maps.Size(80, 80),
-                  }}
-                />
-              ))}
+              {carPosition &&
+                trafficLights.map((signal, index) => (
+                  <Marker
+                    key={index}
+                    position={{ lat: signal.latitude, lng: signal.longitude }}
+                    icon={{
+                      url: "/trafficLight.png",
+                      scaledSize: new window.google.maps.Size(80, 80),
+                    }}
+                  />
+                ))}
               {navigationFlag && carPosition && (
                 <Marker
                   position={carPosition}
@@ -305,21 +305,23 @@ export default function LandingPage({ params }) {
             </>
           )}
         </GoogleMap>
-        <FooterComponent
-          map={map}
-          center={center}
-          directionsResponse1={directionsResponse1}
-          setCenterLat={setCenterLat}
-          setCenterLng={setCenterLng}
-          watchId={watchId}
-          setWatchId={setWatchId}
-          setCarPosition={setCarPosition}
-          setNavigationFlag={setNavigationFlag}
-          navigationFlag={navigationFlag}
-          setDirectionsResponse1={setDirectionsResponse1}
-          setClearRouteFlag={setClearRouteFlag}
-          getOptimizing={getOptimizing}
-        />
+        {directionsResponse1 && (
+          <FooterComponent
+            map={map}
+            center={center}
+            directionsResponse1={directionsResponse1}
+            setCenterLat={setCenterLat}
+            setCenterLng={setCenterLng}
+            watchId={watchId}
+            setWatchId={setWatchId}
+            setCarPosition={setCarPosition}
+            setNavigationFlag={setNavigationFlag}
+            navigationFlag={navigationFlag}
+            setDirectionsResponse1={setDirectionsResponse1}
+            setClearRouteFlag={setClearRouteFlag}
+            getOptimizing={getOptimizing}
+          />
+        )}
       </div>
     )
   );

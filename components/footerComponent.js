@@ -20,6 +20,7 @@ export default function FooterComponent({
   const [loadingDelay, setLoadingDelay] = useState(5);
   const [optimizing, setOptimizing] = useState(false);
   const [optimized, setOptimized] = useState(false);
+  const [speed,setSpeed]=useState(null);
 
   useEffect(() => {
     const geo = navigator.geolocation;
@@ -52,6 +53,9 @@ export default function FooterComponent({
           const id = navigator.geolocation.watchPosition(
             (position) => {
               const { latitude, longitude } = position.coords;
+              const speed=position.coords.speed;
+              console.log(speed);
+              setSpeed(speed);
               // console.log("New position:", latitude, longitude);
               // Update the car's position on the map
               setCarPosition({ lat: latitude, lng: longitude });
@@ -150,7 +154,7 @@ export default function FooterComponent({
         </svg>
       </button>
       {optimized ? (
-        <SpeedDials />
+        <SpeedDials speed={speed}/>
       ) : (
         <button
           onClick={startNavigation}

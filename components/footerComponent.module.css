@@ -10,6 +10,15 @@
   padding: 0.6rem 0;
   backdrop-filter: blur(10px);
   /* background-color: rgba(0, 0, 0, 0.651); */
+  animation: reveal 0.5s ease-in-out forwards;
+}
+@keyframes reveal {
+  0%{
+    bottom: -2rem;
+  }
+  100%{
+    bottom: 0;
+  }
 }
 .container .loadingShade {
   position: absolute;
