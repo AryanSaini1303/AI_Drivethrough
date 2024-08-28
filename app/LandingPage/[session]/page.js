@@ -106,11 +106,18 @@ export default function LandingPage({ params }) {
       setTrafficLights(lightsOnRoute);
       setCenterLat(origin.lat());
       setCenterLng(origin.lng());
+    }
+  }
+
+  useEffect(() => {
+    if (directionsResponse1) {
+      const route = directionsResponse1.routes[0];
+      const origin = route.legs[0].start_location;
       // Calculate distance from user to each traffic light
       const userLocation = new google.maps.LatLng(origin.lat(), origin.lng());
       const service = new google.maps.DistanceMatrixService();
       const maxDestinations = 25; // Google Maps API limit
-      const destinationChunks = chunkArray(lightsOnRoute, maxDestinations);
+      const destinationChunks = chunkArray(trafficLights, maxDestinations);
       // Process each chunk separately
       destinationChunks.forEach((chunk, chunkIndex) => {
         const destinations = chunk.map(
@@ -140,7 +147,7 @@ export default function LandingPage({ params }) {
         );
       });
     }
-  }
+  }, [center]);
 
   function getOptimizing(flag) {
     setOptimizing(flag);
