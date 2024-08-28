@@ -55,7 +55,7 @@ export default function FooterComponent({
               const { latitude, longitude } = position.coords;
               const speed=position.coords.speed;
               console.log(speed);
-              setSpeed(speed);
+              setSpeed((speed * 3.6).toFixed(2));
               // console.log("New position:", latitude, longitude);
               // Update the car's position on the map
               setCarPosition({ lat: latitude, lng: longitude });
