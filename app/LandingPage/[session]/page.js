@@ -110,43 +110,46 @@ export default function LandingPage({ params }) {
   }
 
   useEffect(() => {
-    if (directionsResponse1) {
-      const route = directionsResponse1.routes[0];
-      const origin = route.legs[0].start_location;
-      // Calculate distance from user to each traffic light
-      const userLocation = new google.maps.LatLng(origin.lat(), origin.lng());
-      const service = new google.maps.DistanceMatrixService();
-      const maxDestinations = 25; // Google Maps API limit
-      const destinationChunks = chunkArray(trafficLights, maxDestinations);
-      // Process each chunk separately
-      destinationChunks.forEach((chunk, chunkIndex) => {
-        const destinations = chunk.map(
-          (signal) => new google.maps.LatLng(signal.latitude, signal.longitude)
-        );
-        service.getDistanceMatrix(
-          {
-            origins: [userLocation],
-            destinations: destinations,
-            travelMode: google.maps.TravelMode.DRIVING,
-          },
-          (response, status) => {
-            if (status === "OK") {
-              const results = response.rows[0].elements;
-              results.forEach((result, index) => {
-                console.log(
-                  `Distance to Traffic Signal ${
-                    chunkIndex * maxDestinations + index + 1
-                  }: ${result.distance.text} (${result.duration.text})`
-                );
-              });
-              alert(results.length);
-            } else {
-              console.error("DistanceMatrixService failed due to: " + status);
+    setInterval(() => {
+      if (directionsResponse1) {
+        const route = directionsResponse1.routes[0];
+        const origin = route.legs[0].start_location;
+        // Calculate distance from user to each traffic light
+        const userLocation = new google.maps.LatLng(origin.lat(), origin.lng());
+        const service = new google.maps.DistanceMatrixService();
+        const maxDestinations = 25; // Google Maps API limit
+        const destinationChunks = chunkArray(trafficLights, maxDestinations);
+        // Process each chunk separately
+        destinationChunks.forEach((chunk, chunkIndex) => {
+          const destinations = chunk.map(
+            (signal) =>
+              new google.maps.LatLng(signal.latitude, signal.longitude)
+          );
+          service.getDistanceMatrix(
+            {
+              origins: [userLocation],
+              destinations: destinations,
+              travelMode: google.maps.TravelMode.DRIVING,
+            },
+            (response, status) => {
+              if (status === "OK") {
+                const results = response.rows[0].elements;
+                results.forEach((result, index) => {
+                  console.log(
+                    `Distance to Traffic Signal ${
+                      chunkIndex * maxDestinations + index + 1
+                    }: ${result.distance.text} (${result.duration.text})`
+                  );
+                });
+                alert(results.length);
+              } else {
+                console.error("DistanceMatrixService failed due to: " + status);
+              }
             }
-          }
-        );
-      });
-    }
+          );
+        });
+      }
+    }, 1000);
   }, [center]);
 
   function getOptimizing(flag) {
