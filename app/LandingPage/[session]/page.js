@@ -110,7 +110,6 @@ export default function LandingPage({ params }) {
   }
 
   useEffect(() => {
-    setTimeout(() => {
       if (directionsResponse1) {
         const route = directionsResponse1.routes[0];
         const origin = route.legs[0].start_location;
@@ -149,7 +148,6 @@ export default function LandingPage({ params }) {
           );
         });
       }
-    }, 1000);
   }, [center]);
 
   function getOptimizing(flag) {
