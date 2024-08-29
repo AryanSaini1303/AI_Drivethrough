@@ -101,7 +101,7 @@ export default function LandingPage({ params }) {
     console.log(response);
     console.log(flag);
     if (response) {
-      flag===false?null:setDirectionsResponse1(response);
+      flag === false ? null : setDirectionsResponse1(response);
       const route = response.routes[0];
       const origin = route.legs[0].start_location;
       const polyline = route.overview_path.map((point) => ({
@@ -116,8 +116,8 @@ export default function LandingPage({ params }) {
         )
       );
       setTrafficLights(lightsOnRoute);
-      flag===false?null:setCenterLat(origin.lat());
-      flag===false?null:setCenterLng(origin.lng());
+      flag === false ? null : setCenterLat(origin.lat());
+      flag === false ? null : setCenterLng(origin.lng());
     }
   }
   useEffect(() => {
@@ -188,8 +188,8 @@ export default function LandingPage({ params }) {
     }, 1000);
   }, [status]);
 
+  const geo = navigator.geolocation;
   setInterval(() => {
-    const geo = navigator.geolocation;
     geo.getCurrentPosition(getCoords);
   }, 2000);
 
