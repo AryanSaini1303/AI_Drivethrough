@@ -1,7 +1,11 @@
 [
     {
         "latitude": 28.43467709311115, 
-        "longitude":77.04912198511703
+        "longitude":77.04912198511703,
+        "subhashToHuda":1,
+        "greenDuration":10,
+        "redDuration":33,
+        "initialTime":14400
     },
     {
         "latitude": 28.25148711525007,
@@ -522,6 +526,10 @@
         "id": "node",
         "latitude": 28.449779906663476, 
         "longitude":77.0638507878233,
+        "subhashToHuda":2,
+        "greenDuration":10,
+        "redDuration":10,
+        "initialTime":14400,
         "nearest_node": 6946996564,
         "degree": 3
     },
@@ -1775,6 +1783,10 @@
         "id": "node",
         "latitude": 28.452433,
         "longitude": 77.0663011,
+        "subhashToHuda":3,
+        "greenDuration":10,
+        "redDuration":10,
+        "initialTime":14400,
         "nearest_node": 290142025,
         "degree": 3
     },
@@ -1803,6 +1815,10 @@
         "id": "node",
         "latitude": 28.458959728577746, 
         "longitude":77.07400261622112,
+        "subhashToHuda":4,
+        "greenDuration":10,
+        "redDuration":10,
+        "initialTime":14400,
         "nearest_node": 266595943,
         "degree": 4
     },

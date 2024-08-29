@@ -66,6 +66,8 @@ export default function LandingPage({ params }) {
   const [clearRouteFlag, setClearRouteFlag] = useState(false);
   const [optimizing, setOptimizing] = useState(false);
   const [userLocation1, setUserLocation1] = useState({});
+  const [predictedSpeed, setPredictedSpeed] = useState(0);
+  const [destinationCoordinates, setDestinationCoordinates] = useState(null);
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
@@ -77,10 +79,10 @@ export default function LandingPage({ params }) {
       lat: position.coords.latitude,
       lng: position.coords.longitude,
     });
-    if (position && !directionsResponse1) {
-      setCenterLat(position.coords.latitude);
-      setCenterLng(position.coords.longitude);
-    }
+    // if (position && !directionsResponse1) {
+    //   setCenterLat(position.coords.latitude);
+    //   setCenterLng(position.coords.longitude);
+    // } // uncomment this to autocenter while navigation
   }
   // useEffect(() => {
   //   console.log(userLocation1);
@@ -96,30 +98,32 @@ export default function LandingPage({ params }) {
 
   // Handle response from Google Directions API
   function getDirectionsResponse(response) {
-    console.log(response);
-    if (response) {
-      setDirectionsResponse1(response);
-      const route = response.routes[0];
-      const origin = route.legs[0].start_location;
-      const polyline = route.overview_path.map((point) => ({
-        lat: point.lat(),
-        lng: point.lng(),
-      }));
-      const lightsOnRoute = trafficData.filter((light) =>
-        isPointOnRoute(
-          { lat: light.latitude, lng: light.longitude },
-          polyline,
-          25 // Adjust this threshold as needed
-        )
-      );
-      setTrafficLights(lightsOnRoute);
-      setCenterLat(origin.lat());
-      setCenterLng(origin.lng());
-    }
+    // console.log(response);
+      if (response) {
+        setDirectionsResponse1(response);
+        const route = response.routes[0];
+        const origin = route.legs[0].start_location;
+        const polyline = route.overview_path.map((point) => ({
+          lat: point.lat(),
+          lng: point.lng(),
+        }));
+        const lightsOnRoute = trafficData.filter((light) =>
+          isPointOnRoute(
+            { lat: light.latitude, lng: light.longitude },
+            polyline,
+            25 // Adjust this threshold as needed
+          )
+        );
+        setTrafficLights(lightsOnRoute);
+        setCenterLat(origin.lat());
+        setCenterLng(origin.lng());
+      }
   }
 
   useEffect(() => {
     if (directionsResponse1) {
+      // setCenterLat(userLocation1.lat);
+      // setCenterLng(userLocation1.lng);// uncomment this to autocenter map while navigation
       const userLocation = new google.maps.LatLng(userLocation1);
       const service = new google.maps.DistanceMatrixService();
       const maxDestinations = 25; // Google Maps API limit
@@ -138,10 +142,13 @@ export default function LandingPage({ params }) {
             if (status === "OK") {
               let newTrafficLights = [];
               // Combine results with their corresponding traffic light data
-              let combinedArray = response.rows[0].elements.map((result, index) => ({
-                result,
-                trafficLight: trafficLights[chunkIndex * maxDestinations + index],
-              }));
+              let combinedArray = response.rows[0].elements.map(
+                (result, index) => ({
+                  result,
+                  trafficLight:
+                    trafficLights[chunkIndex * maxDestinations + index],
+                })
+              );
               // Filter out traffic lights that are within 50 meters
               combinedArray = combinedArray.filter(
                 (item) => item.result.distance.value > 50
@@ -151,9 +158,9 @@ export default function LandingPage({ params }) {
                 (a, b) => a.result.distance.value - b.result.distance.value
               );
               // Update the trafficLights state with the filtered and sorted traffic lights
-              newTrafficLights = combinedArray.map(item => item.trafficLight);
+              newTrafficLights = combinedArray.map((item) => item.trafficLight);
               // Set the updated traffic lights
-              setTrafficLights(prevTrafficLights => {
+              setTrafficLights((prevTrafficLights) => {
                 const updatedTrafficLights = [...prevTrafficLights];
                 updatedTrafficLights.splice(
                   chunkIndex * maxDestinations,
@@ -163,15 +170,60 @@ export default function LandingPage({ params }) {
                 return updatedTrafficLights;
               });
               // Log the distances to the remaining traffic lights
-              combinedArray.forEach((item, index) => {
-                console.log(
-                  `Distance to Traffic Signal ${
-                    chunkIndex * maxDestinations + index + 1
-                  }: ${item.result.distance.text} (${item.result.duration.text}) ${
-                    item.trafficLight.latitude
-                  },${item.trafficLight.longitude}`
+              // combinedArray.forEach((item, index) => {
+              //   console.log(
+              //     `Distance to Traffic Signal ${
+              //       chunkIndex * maxDestinations + index + 1
+              //     }: ${item.result.distance.text} (${
+              //       item.result.duration.text
+              //     }) ${item.trafficLight.latitude},${
+              //       item.trafficLight.longitude
+              //     }`
+              //   );
+              // });
+              console.log(
+                `Next Signal: ${combinedArray[0].result.distance.text}`
+              );
+              const upcomingSignalDistance =
+                combinedArray[0].result.distance.value;
+              const greenDuration = combinedArray[0].trafficLight.greenDuration;
+              const redDuration = combinedArray[0].trafficLight.redDuration;
+              const initialTime = combinedArray[0].trafficLight.initialTime;
+              setInterval(() => {
+                const currentTimeHours = new Date().getHours();
+                const currentTimeMinutes = new Date().getMinutes();
+                const currentTimeSeconds = new Date().getSeconds();
+                const currentTime =
+                  currentTimeHours * 3600 +
+                  currentTimeMinutes * 60 +
+                  currentTimeSeconds; // Current time in seconds
+                const actualCurrentTime =
+                  (currentTime - initialTime + 86400) % 86400; // Ensure the time is non-negative and wraps around a 24-hour clock
+                const signalInfo = predictSignalTiming(
+                  greenDuration,
+                  redDuration,
+                  actualCurrentTime
                 );
-              });
+                while (true) {
+                  if (
+                    upcomingSignalDistance / signalInfo.greenWindow >
+                      60 / 3.6 ||
+                    upcomingSignalDistance / signalInfo.greenWindow < 20 / 3.6
+                  ) {
+                    signalInfo.greenWindow += greenDuration + redDuration;
+                    continue;
+                  } else {
+                    setPredictedSpeed(
+                      upcomingSignalDistance / signalInfo.greenWindow
+                    );
+                    break;
+                  }
+                }
+                // console.log(`Current Signal: ${signalInfo.currentSignal}`);
+                // console.log(
+                //   `You have ${signalInfo.greenWindow} seconds to reach the signal so you don't have to wait 😁`
+                // );
+              }, 1000);
             } else {
               console.error("DistanceMatrixService failed due to: " + status);
             }
@@ -180,7 +232,28 @@ export default function LandingPage({ params }) {
       });
     }
   }, [userLocation1]);
-  
+
+  function predictSignalTiming(greenDuration, redDuration, currentTime) {
+    // Total duration of one cycle
+    const cycleDuration = greenDuration + redDuration;
+    // Elapsed time within the current cycle
+    const elapsedTime = currentTime % cycleDuration;
+    // Determine the current signal state and time remaining for change
+    let currentSignal, greenWindow;
+    if (elapsedTime < greenDuration) {
+      // If elapsed time is within the green signal duration
+      currentSignal = "Green";
+      greenWindow = greenDuration - elapsedTime - 5; // time to reach signal to have 5 seconds to cross the signal
+    } else {
+      // If elapsed time exceeds green signal duration, it's in the red signal phase
+      currentSignal = "Red";
+      greenWindow = cycleDuration - elapsedTime + greenDuration - 5; // time to reach signal to have 5 seconds to cross the signalss
+    }
+    return {
+      currentSignal: currentSignal,
+      greenWindow: greenWindow,
+    };
+  }
 
   function getOptimizing(flag) {
     setOptimizing(flag);
@@ -200,7 +273,7 @@ export default function LandingPage({ params }) {
   const geo = navigator.geolocation;
   setInterval(() => {
     geo.getCurrentPosition(getCoords);
-  }, 2000);
+  }, 3000);
 
   useEffect(() => {
     setCarPosition(null);
@@ -393,6 +466,7 @@ export default function LandingPage({ params }) {
             setDirectionsResponse1={setDirectionsResponse1}
             setClearRouteFlag={setClearRouteFlag}
             getOptimizing={getOptimizing}
+            predictedSpeed={predictedSpeed}
           />
         )}
       </div>
