@@ -67,7 +67,7 @@ export default function LandingPage({ params }) {
   const [optimizing, setOptimizing] = useState(false);
   const [userLocation1, setUserLocation1] = useState({});
   const [predictedSpeed, setPredictedSpeed] = useState(0);
-  const [destinationCoordinates, setDestinationCoordinates] = useState(null);
+  const [trafficSignalSaturation, setTrafficSignalSaturation] = useState(false);
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
@@ -79,10 +79,10 @@ export default function LandingPage({ params }) {
       lat: position.coords.latitude,
       lng: position.coords.longitude,
     });
-    // if (position && !directionsResponse1) {
-    //   setCenterLat(position.coords.latitude);
-    //   setCenterLng(position.coords.longitude);
-    // } // uncomment this to autocenter while navigation
+    if (position && !directionsResponse1) {
+      setCenterLat(position.coords.latitude);
+      setCenterLng(position.coords.longitude);
+    } // uncomment this to autocenter while navigation
   }
   // useEffect(() => {
   //   console.log(userLocation1);
@@ -99,31 +99,36 @@ export default function LandingPage({ params }) {
   // Handle response from Google Directions API
   function getDirectionsResponse(response) {
     // console.log(response);
-      if (response) {
-        setDirectionsResponse1(response);
-        const route = response.routes[0];
-        const origin = route.legs[0].start_location;
-        const polyline = route.overview_path.map((point) => ({
-          lat: point.lat(),
-          lng: point.lng(),
-        }));
-        const lightsOnRoute = trafficData.filter((light) =>
-          isPointOnRoute(
-            { lat: light.latitude, lng: light.longitude },
-            polyline,
-            25 // Adjust this threshold as needed
-          )
-        );
-        setTrafficLights(lightsOnRoute);
-        setCenterLat(origin.lat());
-        setCenterLng(origin.lng());
-      }
+    if (response) {
+      setDirectionsResponse1(response);
+      const route = response.routes[0];
+      const origin = route.legs[0].start_location;
+      const polyline = route.overview_path.map((point) => ({
+        lat: point.lat(),
+        lng: point.lng(),
+      }));
+      const lightsOnRoute = trafficData.filter((light) =>
+        isPointOnRoute(
+          { lat: light.latitude, lng: light.longitude },
+          polyline,
+          25 // Adjust this threshold as needed
+        )
+      );
+      setTrafficLights(lightsOnRoute);
+      setCenterLat(origin.lat());
+      setCenterLng(origin.lng());
+    }
   }
 
   useEffect(() => {
     if (directionsResponse1) {
-      // setCenterLat(userLocation1.lat);
-      // setCenterLng(userLocation1.lng);// uncomment this to autocenter map while navigation
+      console.log(trafficLights);
+      if (trafficLights.length === 0) {
+        setTrafficSignalSaturation(true);
+        return;
+      }
+      setCenterLat(userLocation1.lat);
+      setCenterLng(userLocation1.lng); // uncomment this to autocenter map while navigation
       const userLocation = new google.maps.LatLng(userLocation1);
       const service = new google.maps.DistanceMatrixService();
       const maxDestinations = 25; // Google Maps API limit
@@ -181,49 +186,52 @@ export default function LandingPage({ params }) {
               //     }`
               //   );
               // });
-              console.log(
-                `Next Signal: ${combinedArray[0].result.distance.text}`
-              );
-              const upcomingSignalDistance =
-                combinedArray[0].result.distance.value;
-              const greenDuration = combinedArray[0].trafficLight.greenDuration;
-              const redDuration = combinedArray[0].trafficLight.redDuration;
-              const initialTime = combinedArray[0].trafficLight.initialTime;
-              setInterval(() => {
-                const currentTimeHours = new Date().getHours();
-                const currentTimeMinutes = new Date().getMinutes();
-                const currentTimeSeconds = new Date().getSeconds();
-                const currentTime =
-                  currentTimeHours * 3600 +
-                  currentTimeMinutes * 60 +
-                  currentTimeSeconds; // Current time in seconds
-                const actualCurrentTime =
-                  (currentTime - initialTime + 86400) % 86400; // Ensure the time is non-negative and wraps around a 24-hour clock
-                const signalInfo = predictSignalTiming(
-                  greenDuration,
-                  redDuration,
-                  actualCurrentTime
-                );
-                while (true) {
-                  if (
-                    upcomingSignalDistance / signalInfo.greenWindow >
-                      60 / 3.6 ||
-                    upcomingSignalDistance / signalInfo.greenWindow < 20 / 3.6
-                  ) {
-                    signalInfo.greenWindow += greenDuration + redDuration;
-                    continue;
-                  } else {
-                    setPredictedSpeed(
-                      upcomingSignalDistance / signalInfo.greenWindow
-                    );
-                    break;
+              // console.log(
+              //   `Next Signal: ${combinedArray[0].result.distance.text}`
+              // );
+              if (trafficLights.length !== 0) {
+                const upcomingSignalDistance =
+                  combinedArray[0].result.distance.value;
+                const greenDuration =
+                  combinedArray[0].trafficLight.greenDuration;
+                const redDuration = combinedArray[0].trafficLight.redDuration;
+                const initialTime = combinedArray[0].trafficLight.initialTime;
+                setInterval(() => {
+                  const currentTimeHours = new Date().getHours();
+                  const currentTimeMinutes = new Date().getMinutes();
+                  const currentTimeSeconds = new Date().getSeconds();
+                  const currentTime =
+                    currentTimeHours * 3600 +
+                    currentTimeMinutes * 60 +
+                    currentTimeSeconds; // Current time in seconds
+                  const actualCurrentTime =
+                    (currentTime - initialTime + 86400) % 86400; // Ensure the time is non-negative and wraps around a 24-hour clock
+                  const signalInfo = predictSignalTiming(
+                    greenDuration,
+                    redDuration,
+                    actualCurrentTime
+                  );
+                  while (true) {
+                    if (
+                      upcomingSignalDistance / signalInfo.greenWindow >
+                        60 / 3.6 ||
+                      upcomingSignalDistance / signalInfo.greenWindow < 20 / 3.6
+                    ) {
+                      signalInfo.greenWindow += greenDuration + redDuration;
+                      continue;
+                    } else {
+                      setPredictedSpeed(
+                        upcomingSignalDistance / signalInfo.greenWindow
+                      );
+                      break;
+                    }
                   }
-                }
-                // console.log(`Current Signal: ${signalInfo.currentSignal}`);
-                // console.log(
-                //   `You have ${signalInfo.greenWindow} seconds to reach the signal so you don't have to wait 😁`
-                // );
-              }, 1000);
+                  // console.log(`Current Signal: ${signalInfo.currentSignal}`);
+                  // console.log(
+                  //   `You have ${signalInfo.greenWindow} seconds to reach the signal so you don't have to wait 😁`
+                  // );
+                }, 1000);
+              }
             } else {
               console.error("DistanceMatrixService failed due to: " + status);
             }
@@ -467,6 +475,7 @@ export default function LandingPage({ params }) {
             setClearRouteFlag={setClearRouteFlag}
             getOptimizing={getOptimizing}
             predictedSpeed={predictedSpeed}
+            trafficSignalSaturation={trafficSignalSaturation}
           />
         )}
       </div>

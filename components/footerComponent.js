@@ -16,7 +16,8 @@ export default function FooterComponent({
   setDirectionsResponse1,
   setClearRouteFlag,
   getOptimizing,
-  predictedSpeed
+  predictedSpeed,
+  trafficSignalSaturation
 }) {
   const [loadingDelay, setLoadingDelay] = useState(5);
   const [optimizing, setOptimizing] = useState(false);
@@ -153,7 +154,7 @@ export default function FooterComponent({
         </svg>
       </button>
       {optimized ? (
-        <SpeedDials speed={speed} predictedSpeed={predictedSpeed}/>
+        <SpeedDials speed={speed} predictedSpeed={predictedSpeed} trafficSignalSaturation={trafficSignalSaturation}/>
       ) : (
         <button
           onClick={startNavigation}
