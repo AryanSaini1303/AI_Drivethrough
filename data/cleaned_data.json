@@ -1,7 +1,7 @@
 [
     {
-        "latitude": 28.43475641475442,
-        "longitude": 77.04921843988025
+        "latitude": 28.43467709311115, 
+        "longitude":77.04912198511703
     },
     {
         "latitude": 28.25148711525007,
@@ -19,13 +19,6 @@
         "latitude": 28.5362704,
         "longitude": 77.1973711,
         "nearest_node": 250078367,
-        "degree": 4
-    },
-    {
-        "id": "node",
-        "latitude": 28.4500434,
-        "longitude": 77.063861,
-        "nearest_node": 9903240504,
         "degree": 4
     },
     {
@@ -527,8 +520,8 @@
     },
     {
         "id": "node",
-        "latitude": 28.4500181,
-        "longitude": 77.096254,
+        "latitude": 28.449779906663476, 
+        "longitude":77.0638507878233,
         "nearest_node": 6946996564,
         "degree": 3
     },
