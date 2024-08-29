@@ -65,7 +65,9 @@ export default function LandingPage({ params }) {
   const [watchId, setWatchId] = useState(null);
   const [clearRouteFlag, setClearRouteFlag] = useState(false);
   const [optimizing, setOptimizing] = useState(false);
-  // const [userLocation1, setUserLocation1] = useState({});
+  const [userLocation1, setUserLocation1] = useState({});
+  const [directionsResponseTraffic, setDirectionsResponseTraffic] =
+    useState(null);
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
@@ -73,10 +75,10 @@ export default function LandingPage({ params }) {
 
   // Get current position of the user
   function getCoords(position) {
-    // setUserLocation1({
-    //   lat: position.coords.latitude,
-    //   lng: position.coords.longitude,
-    // });
+    setUserLocation1({
+      lat: position.coords.latitude,
+      lng: position.coords.longitude,
+    });
     if (position && !directionsResponse1) {
       setCenterLat(position.coords.latitude);
       setCenterLng(position.coords.longitude);
@@ -95,9 +97,11 @@ export default function LandingPage({ params }) {
   }
 
   // Handle response from Google Directions API
-  function getDirectionsResponse(response) {
+  function getDirectionsResponse(response, flag) {
+    console.log(response);
+    console.log(flag);
     if (response) {
-      setDirectionsResponse1(response);
+      flag===false?null:setDirectionsResponse1(response);
       const route = response.routes[0];
       const origin = route.legs[0].start_location;
       const polyline = route.overview_path.map((point) => ({
@@ -108,53 +112,66 @@ export default function LandingPage({ params }) {
         isPointOnRoute(
           { lat: light.latitude, lng: light.longitude },
           polyline,
-          50 // Adjust this threshold as needed
+          25 // Adjust this threshold as needed
         )
       );
       setTrafficLights(lightsOnRoute);
-      setCenterLat(origin.lat());
-      setCenterLng(origin.lng());
+      flag===false?null:setCenterLat(origin.lat());
+      flag===false?null:setCenterLng(origin.lng());
     }
   }
+  useEffect(() => {
+    setDirectionsResponseTraffic(directionsResponseTraffic);
+  }, [directionsResponseTraffic]);
+  useEffect(() => {
+    console.log(trafficLights);
+    console.log(directionsResponse1);
+  }, [trafficLights]);
 
-  // useEffect(() => {
-  //   if (directionsResponse1) {
-  //     const route = directionsResponse1.routes[0];
-  //     const origin = route.legs[0].start_location;
-  //     // Calculate distance from user to each traffic light
-  //     const userLocation = new google.maps.LatLng(origin.lat(), origin.lng());
-  //     const service = new google.maps.DistanceMatrixService();
-  //     const maxDestinations = 25; // Google Maps API limit
-  //     const destinationChunks = chunkArray(trafficLights, maxDestinations);
-  //     // Process each chunk separately
-  //     destinationChunks.forEach((chunk, chunkIndex) => {
-  //       const destinations = chunk.map(
-  //         (signal) => new google.maps.LatLng(signal.latitude, signal.longitude)
-  //       );
-  //       service.getDistanceMatrix(
-  //         {
-  //           origins: [userLocation],
-  //           destinations: destinations,
-  //           travelMode: google.maps.TravelMode.DRIVING,
-  //         },
-  //         (response, status) => {
-  //           if (status === "OK") {
-  //             const results = response.rows[0].elements;
-  //             results.forEach((result, index) => {
-  //               console.log(
-  //                 `Distance to Traffic Signal ${
-  //                   chunkIndex * maxDestinations + index + 1
-  //                 }: ${result.distance.text} (${result.duration.text})`
-  //               );
-  //             });
-  //           } else {
-  //             console.error("DistanceMatrixService failed due to: " + status);
-  //           }
-  //         }
-  //       );
-  //     });
-  //   }
-  // }, [center]);
+  function getDirectionsResponseTraffic(response) {
+    console.log(response);
+    getDirectionsResponse(response, false);
+  }
+
+  useEffect(() => {
+    if (directionsResponse1) {
+      // const route = directionsResponse1.routes[0];
+      // const origin = route.legs[0].start_location;
+      // Calculate distance from user to each traffic light
+      // const userLocation = new google.maps.LatLng(origin.lat(), origin.lng());
+      const userLocation = new google.maps.LatLng(userLocation1);
+      const service = new google.maps.DistanceMatrixService();
+      const maxDestinations = 25; // Google Maps API limit
+      const destinationChunks = chunkArray(trafficLights, maxDestinations);
+      // Process each chunk separately
+      destinationChunks.forEach((chunk, chunkIndex) => {
+        const destinations = chunk.map(
+          (signal) => new google.maps.LatLng(signal.latitude, signal.longitude)
+        );
+        service.getDistanceMatrix(
+          {
+            origins: [userLocation],
+            destinations: destinations,
+            travelMode: google.maps.TravelMode.DRIVING,
+          },
+          (response, status) => {
+            if (status === "OK") {
+              const results = response.rows[0].elements;
+              // results.forEach((result, index) => {
+              //   console.log(
+              //     `Distance to Traffic Signal ${
+              //       chunkIndex * maxDestinations + index + 1
+              //     }: ${result.distance.text} (${result.duration.text})`
+              //   );
+              // });
+            } else {
+              console.error("DistanceMatrixService failed due to: " + status);
+            }
+          }
+        );
+      });
+    }
+  }, [center]);
 
   function getOptimizing(flag) {
     setOptimizing(flag);
@@ -299,7 +316,9 @@ export default function LandingPage({ params }) {
           setClearRouteFlag={setClearRouteFlag}
           optimizing={optimizing}
           carPosition={carPosition}
-          // userLocation1={userLocation1}
+          userLocation1={userLocation1}
+          getDirectionsResponseTraffic={getDirectionsResponseTraffic}
+          setDirectionsResponseTraffic={setDirectionsResponseTraffic}
         />
 
         <GoogleMap
@@ -368,6 +387,7 @@ export default function LandingPage({ params }) {
             setDirectionsResponse1={setDirectionsResponse1}
             setClearRouteFlag={setClearRouteFlag}
             getOptimizing={getOptimizing}
+            setDirectionsResponseTraffic={setDirectionsResponseTraffic}
           />
         )}
       </div>

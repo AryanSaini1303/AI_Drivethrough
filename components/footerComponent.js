@@ -16,6 +16,7 @@ export default function FooterComponent({
   setDirectionsResponse1,
   setClearRouteFlag,
   getOptimizing,
+  setDirectionsResponseTraffic
 }) {
   const [loadingDelay, setLoadingDelay] = useState(5);
   const [optimizing, setOptimizing] = useState(false);
@@ -113,6 +114,7 @@ export default function FooterComponent({
   }
 
   function clearRoute() {
+    setDirectionsResponseTraffic(null);
     setNavigationFlag(false);
     setDirectionsResponse1(null);
     setClearRouteFlag(true);
