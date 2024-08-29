@@ -120,15 +120,10 @@ export default function LandingPage({ params }) {
 
   useEffect(() => {
     if (directionsResponse1) {
-      // const route = directionsResponse1.routes[0];
-      // const origin = route.legs[0].start_location;
-      // Calculate distance from user to each traffic light
-      // const userLocation = new google.maps.LatLng(origin.lat(), origin.lng());
       const userLocation = new google.maps.LatLng(userLocation1);
       const service = new google.maps.DistanceMatrixService();
       const maxDestinations = 25; // Google Maps API limit
       const destinationChunks = chunkArray(trafficLights, maxDestinations);
-      // Process each chunk separately
       destinationChunks.forEach((chunk, chunkIndex) => {
         const destinations = chunk.map(
           (signal) => new google.maps.LatLng(signal.latitude, signal.longitude)
@@ -141,26 +136,40 @@ export default function LandingPage({ params }) {
           },
           (response, status) => {
             if (status === "OK") {
-              const newTrafficLights=[];
-              var results = response.rows[0].elements;
-              const newresults=[];
-              results.map((result,index)=>{
-                console.log(result.distance.value);
-                if(result.distance.value>50){
-                  newTrafficLights.push(trafficLights[index]);
-                  newresults.push(results[index]);
-                }
-                if(index===results.length-1){
-                  setTrafficLights(newTrafficLights);
-                }
-              })
-              results=newresults;
-              console.log(newTrafficLights);
-              results.forEach((result, index) => {
+              let newTrafficLights = [];
+              // Combine results with their corresponding traffic light data
+              let combinedArray = response.rows[0].elements.map((result, index) => ({
+                result,
+                trafficLight: trafficLights[chunkIndex * maxDestinations + index],
+              }));
+              // Filter out traffic lights that are within 50 meters
+              combinedArray = combinedArray.filter(
+                (item) => item.result.distance.value > 50
+              );
+              // Sort the remaining traffic lights by distance
+              combinedArray.sort(
+                (a, b) => a.result.distance.value - b.result.distance.value
+              );
+              // Update the trafficLights state with the filtered and sorted traffic lights
+              newTrafficLights = combinedArray.map(item => item.trafficLight);
+              // Set the updated traffic lights
+              setTrafficLights(prevTrafficLights => {
+                const updatedTrafficLights = [...prevTrafficLights];
+                updatedTrafficLights.splice(
+                  chunkIndex * maxDestinations,
+                  chunk.length,
+                  ...newTrafficLights
+                );
+                return updatedTrafficLights;
+              });
+              // Log the distances to the remaining traffic lights
+              combinedArray.forEach((item, index) => {
                 console.log(
                   `Distance to Traffic Signal ${
                     chunkIndex * maxDestinations + index + 1
-                  }: ${result.distance.text} (${result.duration.text}) ${trafficLights[index].latitude},${trafficLights[index].longitude}`
+                  }: ${item.result.distance.text} (${item.result.duration.text}) ${
+                    item.trafficLight.latitude
+                  },${item.trafficLight.longitude}`
                 );
               });
             } else {
@@ -171,6 +180,7 @@ export default function LandingPage({ params }) {
       });
     }
   }, [userLocation1]);
+  
 
   function getOptimizing(flag) {
     setOptimizing(flag);
