@@ -1,0 +1,20 @@
+Distance to Traffic Signal 1: 25.6 km (29 mins)
+page.js:167 28.4595952,77.049618
+page.js:162 Distance to Traffic Signal 2: 27.9 km (34 mins)
+page.js:167 28.4590177,77.0742091
+page.js:162 Distance to Traffic Signal 3: 21.8 km (24 mins)
+page.js:167 28.4520118,77.0415582
+page.js:162 Distance to Traffic Signal 4: 18.2 km (22 mins)
+page.js:167 28.4015751,77.0446268
+page.js:162 Distance to Traffic Signal 5: 15.6 km (18 mins)
+page.js:167 28.4012181,77.0447044
+page.js:162 Distance to Traffic Signal 6: 21.9 km (24 mins)
+page.js:167 28.4012625,77.045036
+page.js:162 Distance to Traffic Signal 7: 15.7 km (18 mins)
+page.js:167 28.4016072,77.0449487
+page.js:162 Distance to Traffic Signal 8: 26.6 km (30 mins)
+page.js:167 28.461252,77.0675885
+page.js:162 Distance to Traffic Signal 9: 24.1 km (32 mins)
+page.js:167 28.461143,77.0676428
+page.js:162 Distance to Traffic Signal 10: 27.4 km (33 mins)
+page.js:167 28.4588905,77.0739356

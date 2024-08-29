@@ -66,8 +66,6 @@ export default function LandingPage({ params }) {
   const [clearRouteFlag, setClearRouteFlag] = useState(false);
   const [optimizing, setOptimizing] = useState(false);
   const [userLocation1, setUserLocation1] = useState({});
-  const [directionsResponseTraffic, setDirectionsResponseTraffic] =
-    useState(null);
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
@@ -97,11 +95,10 @@ export default function LandingPage({ params }) {
   }
 
   // Handle response from Google Directions API
-  function getDirectionsResponse(response, flag) {
+  function getDirectionsResponse(response) {
     console.log(response);
-    console.log(flag);
     if (response) {
-      flag === false ? null : setDirectionsResponse1(response);
+      setDirectionsResponse1(response);
       const route = response.routes[0];
       const origin = route.legs[0].start_location;
       const polyline = route.overview_path.map((point) => ({
@@ -116,21 +113,9 @@ export default function LandingPage({ params }) {
         )
       );
       setTrafficLights(lightsOnRoute);
-      flag === false ? null : setCenterLat(origin.lat());
-      flag === false ? null : setCenterLng(origin.lng());
+      setCenterLat(origin.lat());
+      setCenterLng(origin.lng());
     }
-  }
-  useEffect(() => {
-    setDirectionsResponseTraffic(directionsResponseTraffic);
-  }, [directionsResponseTraffic]);
-  useEffect(() => {
-    console.log(trafficLights);
-    console.log(directionsResponse1);
-  }, [trafficLights]);
-
-  function getDirectionsResponseTraffic(response) {
-    console.log(response);
-    getDirectionsResponse(response, false);
   }
 
   useEffect(() => {
@@ -156,14 +141,28 @@ export default function LandingPage({ params }) {
           },
           (response, status) => {
             if (status === "OK") {
-              const results = response.rows[0].elements;
-              // results.forEach((result, index) => {
-              //   console.log(
-              //     `Distance to Traffic Signal ${
-              //       chunkIndex * maxDestinations + index + 1
-              //     }: ${result.distance.text} (${result.duration.text})`
-              //   );
-              // });
+              const newTrafficLights=[];
+              var results = response.rows[0].elements;
+              const newresults=[];
+              results.map((result,index)=>{
+                console.log(result.distance.value);
+                if(result.distance.value>50){
+                  newTrafficLights.push(trafficLights[index]);
+                  newresults.push(results[index]);
+                }
+                if(index===results.length-1){
+                  setTrafficLights(newTrafficLights);
+                }
+              })
+              results=newresults;
+              console.log(newTrafficLights);
+              results.forEach((result, index) => {
+                console.log(
+                  `Distance to Traffic Signal ${
+                    chunkIndex * maxDestinations + index + 1
+                  }: ${result.distance.text} (${result.duration.text}) ${trafficLights[index].latitude},${trafficLights[index].longitude}`
+                );
+              });
             } else {
               console.error("DistanceMatrixService failed due to: " + status);
             }
@@ -171,7 +170,7 @@ export default function LandingPage({ params }) {
         );
       });
     }
-  }, [center]);
+  }, [userLocation1]);
 
   function getOptimizing(flag) {
     setOptimizing(flag);
@@ -316,9 +315,6 @@ export default function LandingPage({ params }) {
           setClearRouteFlag={setClearRouteFlag}
           optimizing={optimizing}
           carPosition={carPosition}
-          userLocation1={userLocation1}
-          getDirectionsResponseTraffic={getDirectionsResponseTraffic}
-          setDirectionsResponseTraffic={setDirectionsResponseTraffic}
         />
 
         <GoogleMap
@@ -387,7 +383,6 @@ export default function LandingPage({ params }) {
             setDirectionsResponse1={setDirectionsResponse1}
             setClearRouteFlag={setClearRouteFlag}
             getOptimizing={getOptimizing}
-            setDirectionsResponseTraffic={setDirectionsResponseTraffic}
           />
         )}
       </div>
