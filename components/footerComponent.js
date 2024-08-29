@@ -56,11 +56,10 @@ export default function FooterComponent({
               const speed=position.coords.speed;
               console.log(speed);
               setSpeed((speed * 3.6).toFixed(2));
-              // console.log("New position:", latitude, longitude);
-              // Update the car's position on the map
               setCarPosition({ lat: latitude, lng: longitude });
-              setCenterLat(latitude);
-              setCenterLng(longitude);
+              // setCenterLat(latitude);
+              // setCenterLng(longitude);
+              updatePath(latitude, longitude);
             },
             (error) => {
               handleGeolocationError(error);
@@ -79,6 +78,43 @@ export default function FooterComponent({
       }, delay * 1000);
     }
   }
+
+  function updatePath(lat, lng) {
+    if (!directionsResponse1) return;
+  
+    const path = directionsResponse1.routes[0].overview_path;
+    const userPosition = new google.maps.LatLng(lat, lng);
+  
+    // Find the closest point on the path to the user's current location
+    let closestPointIndex = 0;
+    let closestDistance = Infinity;
+    
+    path.forEach((point, index) => {
+      const pointLatLng = new google.maps.LatLng(point.lat(), point.lng());
+      const distance = google.maps.geometry.spherical.computeDistanceBetween(
+        userPosition,
+        pointLatLng
+      );
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestPointIndex = index;
+      }
+    });
+  
+    // Update the route to reflect the path ahead
+    const updatedPath = path.slice(closestPointIndex);
+    console.log(updatedPath);
+    setDirectionsResponse1({
+      ...directionsResponse1,
+      routes: [
+        {
+          ...directionsResponse1.routes[0],
+          overview_path: updatedPath,
+        },
+      ],
+    });
+  }
+  
 
   useEffect(() => {
     getOptimizing(optimizing);

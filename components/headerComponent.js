@@ -10,7 +10,7 @@ export default function HeaderComponent({
   setClearRouteFlag,
   optimizing,
   carPosition,
-  userLocation1
+  // userLocation1
 }) {
   const originRef = useRef();
   const destinationRef = useRef();
@@ -19,36 +19,36 @@ export default function HeaderComponent({
   const [destinationInputFlag, setDestinationInputFlag] = useState(false);
   const [distance, setDistance] = useState("");
   const [duration, setDuration] = useState("");
-  const [userLocation2,setUserLocation2]=useState({});
+  // const [userLocation2,setUserLocation2]=useState({});
 
   useEffect(() => {
     getDirectionsResponse(directionsResponse);
   }, [directionsResponse]);
   
-  useEffect(() => {
-    const fetchDirections = async () => {
-      // Check if the user location has changed
-      if (userLocation2.lat !== userLocation1.lat && userLocation2.lng !== userLocation1.lng&&userLocation2) {
-        setUserLocation2(userLocation1);
-        console.log(userLocation1);
-        const directionsService = new google.maps.DirectionsService();
-        try {
-          const results = await directionsService.route({
-            origin: userLocation2,
-            destination: destinationRef.current.value,
-            travelMode: google.maps.TravelMode.DRIVING,
-          });
-          setDirectionsResponse(results);
-          setDistance(results.routes[0].legs[0].distance.text);
-          setDuration(results.routes[0].legs[0].duration.text);
-          // The map's center or panTo is not updated here
-        } catch (error) {
-          console.error("Error fetching directions:", error);
-        }
-      }
-    };
-    fetchDirections(); // Call the async function inside the useEffect
-  }, [userLocation1]);
+  // useEffect(() => {
+  //   const fetchDirections = async () => {
+  //     // Check if the user location has changed
+  //     if (userLocation2.lat !== userLocation1.lat && userLocation2.lng !== userLocation1.lng&&userLocation2) {
+  //       setUserLocation2(userLocation1);
+  //       console.log(userLocation1);
+  //       const directionsService = new google.maps.DirectionsService();
+  //       try {
+  //         const results = await directionsService.route({
+  //           origin: userLocation2,
+  //           destination: destinationRef.current.value,
+  //           travelMode: google.maps.TravelMode.DRIVING,
+  //         });
+  //         setDirectionsResponse(results);
+  //         setDistance(results.routes[0].legs[0].distance.text);
+  //         setDuration(results.routes[0].legs[0].duration.text);
+  //         // The map's center or panTo is not updated here
+  //       } catch (error) {
+  //         console.error("Error fetching directions:", error);
+  //       }
+  //     }
+  //   };
+  //   fetchDirections(); // Call the async function inside the useEffect
+  // }, [userLocation1]);
   
   
 
