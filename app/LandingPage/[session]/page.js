@@ -158,6 +158,7 @@ export default function LandingPage({ params }) {
                 combinedArray = combinedArray.filter(
                   (item) => item.result.distance.value > 50
                 );
+                console.log(combinedArray);
                 // Sort the remaining traffic lights by distance
                 combinedArray.sort(
                   (a, b) => a.result.distance.value - b.result.distance.value
@@ -255,8 +256,6 @@ export default function LandingPage({ params }) {
     }, 1000);
     return () => clearTimeout(timer);
   }, [userLocation1, trafficSignalSaturation]);
-  console.log(reachingProbability);
-  console.log(trafficSignalSaturation);
 
   function predictSignalTiming(greenDuration, redDuration, currentTime) {
     // Total duration of one cycle
