@@ -19,7 +19,8 @@ export default function FooterComponent({
   predictedSpeed,
   trafficSignalSaturation,
   getCurrentSpeedFromFooter,
-  reachingProbability
+  reachingProbability,
+  getOptimizedFromFooter
 }) {
   const [loadingDelay, setLoadingDelay] = useState(5);
   const [optimizing, setOptimizing] = useState(false);
@@ -47,6 +48,7 @@ export default function FooterComponent({
       setTimeout(() => {
         setOptimized(true);
         setOptimizing(false);
+        getOptimizedFromFooter(true);
         if (watchId) {
           // console.log("Clearing previous watchId:", watchId);
           navigator.geolocation.clearWatch(watchId);
@@ -123,6 +125,7 @@ export default function FooterComponent({
     setDirectionsResponse1(null);
     setClearRouteFlag(true);
     setOptimized(false);
+    getOptimizedFromFooter(false);
     // Stop the geolocation watch if it exists
     if (watchId) {
       navigator.geolocation.clearWatch(watchId);

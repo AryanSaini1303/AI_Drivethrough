@@ -70,6 +70,7 @@ export default function LandingPage({ params }) {
   const [trafficSignalSaturation, setTrafficSignalSaturation] = useState(false);
   const [currentSpeed, setCurrentSpeed] = useState(0);
   const [reachingProbability, setReachingProbability] = useState();
+  const [isOptimized,setIsOptimized]=useState(false);
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
@@ -123,7 +124,7 @@ export default function LandingPage({ params }) {
   }
 
   useEffect(() => {
-    if (directionsResponse1) {
+    if (directionsResponse1&&isOptimized) {
       setCenterLat(userLocation1.lat);
       setCenterLng(userLocation1.lng); // uncomment this to autocenter map while navigation
       const userLocation = new google.maps.LatLng(userLocation1);
@@ -197,9 +198,7 @@ export default function LandingPage({ params }) {
                     while (true) {
                       if (
                         upcomingSignalDistance / signalInfo.greenWindow >
-                          80 / 3.6 ||
-                        upcomingSignalDistance / signalInfo.greenWindow <
-                          20 / 3.6
+                          80 / 3.6
                       ) {
                         signalInfo.greenWindow += greenDuration + redDuration;
                         continue;
@@ -208,7 +207,7 @@ export default function LandingPage({ params }) {
                         setPredictedSpeed(
                           upcomingSignalDistance / signalInfo.greenWindow
                         );
-                        const eta = upcomingSignalDistance / (50 / 3.6);
+                        const eta = upcomingSignalDistance / (currentSpeed / 3.6);
                         console.log(eta);
                         const timeDifference = Math.sqrt(
                           (eta - signalInfo.greenWindow) *
@@ -219,7 +218,6 @@ export default function LandingPage({ params }) {
                           timeDifference > greenDuration * 0.25 &&
                           timeDifference < greenDuration - greenDuration * 0.25
                         ) {
-                          console.log("here");
                           setReachingProbability(100);
                         } else if (
                           (timeDifference >
@@ -229,8 +227,6 @@ export default function LandingPage({ params }) {
                             timeDifference < greenDuration * 0.25)
                         ) {
                           setReachingProbability(25);
-                        } else {
-                          console.log("here");
                         }
                         break;
                       }
@@ -265,12 +261,12 @@ export default function LandingPage({ params }) {
     if (elapsedTime < greenDuration) {
       // If elapsed time is within the green signal duration
       currentSignal = "Green";
-      greenWindow = greenDuration - elapsedTime - greenDuration * 0.25; // time to reach signal to have 5 seconds to cross the signal
+      greenWindow = greenDuration - elapsedTime; // time to reach signal to have 5 seconds to cross the signal
     } else {
       // If elapsed time exceeds green signal duration, it's in the red signal phase
       currentSignal = "Red";
       greenWindow =
-        cycleDuration - elapsedTime + greenDuration - greenDuration * 0.25; // time to reach signal to have 5 seconds to cross the signalss
+        cycleDuration - elapsedTime + greenDuration; // time to reach signal to have 5 seconds to cross the signalss
     }
     return {
       currentSignal: currentSignal,
@@ -296,6 +292,10 @@ export default function LandingPage({ params }) {
       }
     }, 1000);
   }, [status]);
+
+  function getOptimizedFromFooter(flag){
+    setIsOptimized(flag);
+  }
 
   const geo = navigator.geolocation;
   setInterval(() => {
@@ -497,6 +497,7 @@ export default function LandingPage({ params }) {
             trafficSignalSaturation={trafficSignalSaturation}
             getCurrentSpeedFromFooter={getCurrentSpeedFromFooter}
             reachingProbability={reachingProbability}
+            getOptimizedFromFooter={getOptimizedFromFooter}
           />
         )}
       </div>
