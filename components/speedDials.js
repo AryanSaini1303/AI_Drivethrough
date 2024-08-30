@@ -10,7 +10,7 @@ export default function SpeedDials({speed, predictedSpeed, trafficSignalSaturati
     const [predictedSpeedNext,setPredictedSpeedNext]=useState(0);
     setInterval(() => {
         setPredictedSpeedNext(predictedSpeed);
-    }, 1000);
+    }, 2000);
     console.log(reachingProbability);
     return(
         <div className={styles.container}>

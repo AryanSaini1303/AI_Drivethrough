@@ -124,7 +124,7 @@ export default function LandingPage({ params }) {
   }
 
   useEffect(() => {
-    if (directionsResponse1&&isOptimized) {
+    if (directionsResponse1&&optimizing) {
       setCenterLat(userLocation1.lat);
       setCenterLng(userLocation1.lng); // uncomment this to autocenter map while navigation
       const userLocation = new google.maps.LatLng(userLocation1);
