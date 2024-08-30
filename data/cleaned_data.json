@@ -8,13 +8,13 @@
     "initialTime": 14400
   },
   {
-    "latitude": 28.251485058885343, 
-    "longitude":77.06963572747756,
-    "greenDuration": 25,
-    "redDuration": 63,
-    "initialTime": 57046,
-    "name": "Sohna Om Sweets"
-  },
+    "latitude": 28.25148711525007,
+    "longitude": 77.06959205981099,
+    "greenDuration":25,
+    "redDuration":63,
+    "initialTime":57046,
+    "name":"Sohna Om Sweets"
+},
   {
     "id": "node",
     "latitude": 28.4616968,

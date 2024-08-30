@@ -78,6 +78,7 @@ export default function LandingPage({ params }) {
 
   // Get current position of the user
   function getCoords(position) {
+    console.log('here');
     setUserLocation1({
       lat: position.coords.latitude,
       lng: position.coords.longitude,
@@ -87,9 +88,9 @@ export default function LandingPage({ params }) {
       setCenterLng(position.coords.longitude);
     } // uncomment this to autocenter while navigation
   }
-  // useEffect(() => {
-  //   console.log(userLocation1);
-  // }, [userLocation1]);
+  useEffect(() => {
+    console.log(userLocation1);
+  }, [userLocation1]);
 
   function chunkArray(array, chunkSize) {
     const chunks = [];
@@ -125,7 +126,7 @@ export default function LandingPage({ params }) {
 
   useEffect(() => {
     let timer = setTimeout(() => {
-      if (directionsResponse1 && optimizing) {
+      if (directionsResponse1&&!trafficSignalSaturation) {
         setCenterLat(userLocation1.lat);
         setCenterLng(userLocation1.lng); // uncomment this to autocenter map while navigation
         const userLocation = new google.maps.LatLng(userLocation1);
@@ -158,7 +159,6 @@ export default function LandingPage({ params }) {
                 combinedArray = combinedArray.filter(
                   (item) => item.result.distance.value > 50
                 );
-                console.log(combinedArray);
                 // Sort the remaining traffic lights by distance
                 combinedArray.sort(
                   (a, b) => a.result.distance.value - b.result.distance.value
@@ -178,7 +178,6 @@ export default function LandingPage({ params }) {
                   return updatedTrafficLights;
                 });
                 if (combinedArray && combinedArray.length !== 0) {
-                  console.log(combinedArray);
                   const upcomingSignalDistance =
                     combinedArray[0].result.distance.value;
                   const greenDuration =
