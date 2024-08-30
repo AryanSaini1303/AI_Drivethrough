@@ -200,12 +200,7 @@ export default function LandingPage({ params }) {
                         upcomingSignalDistance / signalInfo.greenWindow >
                           80 / 3.6
                       ) {
-                        if(signalInfo.greenWindow<greenDuration*.25){
-                          signalInfo.greenWindow += redDuration;
-                        }
-                        else{
-                          signalInfo.greenWindow+=greenDuration+redDuration;
-                        }
+                        signalInfo.greenWindow += greenDuration + redDuration;
                         continue;
                       } else {
                         console.log(signalInfo.greenWindow);
