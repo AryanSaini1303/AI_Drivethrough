@@ -7,13 +7,33 @@
     width: 10rem;
     border-radius: 50%;
     background-color: rgba(0, 0, 0, 0.95);
-    border: solid #009900 3px;
+    /* border-top: solid #009900 3px;
+    border-left: none;
+    border-right: none;
+    border-bottom: solid red 3px; */
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.2rem;
     color: white;
     padding-top: 0.5rem;
+    z-index: 2;
+}
+.container .probCurve{
+    position: absolute;
+    height: 10.3rem;
+    width: 10.3rem;
+    border-radius: 50%;
+    top: 0;
+    transform: rotate(45deg);
+    /* left: 50%; */
+    /* transform: translate(-50%,-50%); */
+    border-top: solid green 4px;
+    border-left: solid green 4px;
+    border-right: solid red 4px;
+    border-bottom: solid red 4px;
+    z-index: 1;
+    transition: all 1s ease-in-out;
 }
 .container *{
     margin:0

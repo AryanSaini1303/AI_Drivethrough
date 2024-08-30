@@ -68,6 +68,8 @@ export default function LandingPage({ params }) {
   const [userLocation1, setUserLocation1] = useState({});
   const [predictedSpeed, setPredictedSpeed] = useState(0);
   const [trafficSignalSaturation, setTrafficSignalSaturation] = useState(false);
+  const [currentSpeed, setCurrentSpeed] = useState(0);
+  const [reachingProbability, setReachingProbability] = useState();
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
@@ -122,11 +124,6 @@ export default function LandingPage({ params }) {
 
   useEffect(() => {
     if (directionsResponse1) {
-      console.log(trafficLights);
-      if (trafficLights.length === 0) {
-        setTrafficSignalSaturation(true);
-        return;
-      }
       setCenterLat(userLocation1.lat);
       setCenterLng(userLocation1.lng); // uncomment this to autocenter map while navigation
       const userLocation = new google.maps.LatLng(userLocation1);
@@ -174,63 +171,78 @@ export default function LandingPage({ params }) {
                 );
                 return updatedTrafficLights;
               });
-              // Log the distances to the remaining traffic lights
-              // combinedArray.forEach((item, index) => {
-              //   console.log(
-              //     `Distance to Traffic Signal ${
-              //       chunkIndex * maxDestinations + index + 1
-              //     }: ${item.result.distance.text} (${
-              //       item.result.duration.text
-              //     }) ${item.trafficLight.latitude},${
-              //       item.trafficLight.longitude
-              //     }`
-              //   );
-              // });
-              // console.log(
-              //   `Next Signal: ${combinedArray[0].result.distance.text}`
-              // );
-              if (trafficLights.length !== 0) {
+              if (combinedArray && combinedArray.length !== 0) {
+                console.log(combinedArray);
                 const upcomingSignalDistance =
                   combinedArray[0].result.distance.value;
                 const greenDuration =
                   combinedArray[0].trafficLight.greenDuration;
                 const redDuration = combinedArray[0].trafficLight.redDuration;
                 const initialTime = combinedArray[0].trafficLight.initialTime;
-                setInterval(() => {
-                  const currentTimeHours = new Date().getHours();
-                  const currentTimeMinutes = new Date().getMinutes();
-                  const currentTimeSeconds = new Date().getSeconds();
-                  const currentTime =
-                    currentTimeHours * 3600 +
-                    currentTimeMinutes * 60 +
-                    currentTimeSeconds; // Current time in seconds
-                  const actualCurrentTime =
-                    (currentTime - initialTime + 86400) % 86400; // Ensure the time is non-negative and wraps around a 24-hour clock
-                  const signalInfo = predictSignalTiming(
-                    greenDuration,
-                    redDuration,
-                    actualCurrentTime
-                  );
-                  while (true) {
-                    if (
-                      upcomingSignalDistance / signalInfo.greenWindow >
-                        60 / 3.6 ||
-                      upcomingSignalDistance / signalInfo.greenWindow < 20 / 3.6
-                    ) {
-                      signalInfo.greenWindow += greenDuration + redDuration;
-                      continue;
-                    } else {
-                      setPredictedSpeed(
-                        upcomingSignalDistance / signalInfo.greenWindow
-                      );
-                      break;
+                  setInterval(() => {
+                    const currentTimeHours = new Date().getHours();
+                    const currentTimeMinutes = new Date().getMinutes();
+                    const currentTimeSeconds = new Date().getSeconds();
+                    const currentTime =
+                      currentTimeHours * 3600 +
+                      currentTimeMinutes * 60 +
+                      currentTimeSeconds; // Current time in seconds
+                    const actualCurrentTime =
+                      (currentTime - initialTime + 86400) % 86400; // Ensure the time is non-negative and wraps around a 24-hour clock
+                    const signalInfo = predictSignalTiming(
+                      greenDuration,
+                      redDuration,
+                      actualCurrentTime
+                    );
+                    while (true) {
+                      if (
+                        upcomingSignalDistance / signalInfo.greenWindow >
+                          80 / 3.6 ||
+                        upcomingSignalDistance / signalInfo.greenWindow <
+                          20 / 3.6
+                      ) {
+                        signalInfo.greenWindow += greenDuration + redDuration;
+                        continue;
+                      } else {
+                        console.log(signalInfo.greenWindow);
+                        setPredictedSpeed(
+                          upcomingSignalDistance / signalInfo.greenWindow
+                        );
+                        const eta = upcomingSignalDistance / (50 / 3.6);
+                        console.log(eta);
+                        const timeDifference = Math.sqrt(
+                          (eta - signalInfo.greenWindow) *
+                            (eta - signalInfo.greenWindow)
+                        );
+                        console.log(timeDifference);
+                        if (
+                          timeDifference > greenDuration * 0.25 &&
+                          timeDifference < greenDuration - greenDuration * 0.25
+                        ) {
+                          console.log("here");
+                          setReachingProbability(100);
+                        } else if (
+                          (timeDifference >
+                            greenDuration - greenDuration * 0.25 &&
+                            timeDifference < greenDuration) ||
+                          (timeDifference > 0 &&
+                            timeDifference < greenDuration * 0.25)
+                        ) {
+                          setReachingProbability(25);
+                        } else {
+                          console.log("here");
+                        }
+                        break;
+                      }
                     }
-                  }
-                  // console.log(`Current Signal: ${signalInfo.currentSignal}`);
-                  // console.log(
-                  //   `You have ${signalInfo.greenWindow} seconds to reach the signal so you don't have to wait 😁`
-                  // );
-                }, 1000);
+                    // console.log(`Current Signal: ${signalInfo.currentSignal}`);
+                    // console.log(
+                    //   `You have ${signalInfo.greenWindow} seconds to reach the signal so you don't have to wait 😁`
+                    // );
+                  }, 1000);
+              } else {
+                setTrafficSignalSaturation(true);
+                setReachingProbability(100);
               }
             } else {
               console.error("DistanceMatrixService failed due to: " + status);
@@ -239,7 +251,9 @@ export default function LandingPage({ params }) {
         );
       });
     }
-  }, [userLocation1]);
+  }, [userLocation1, trafficSignalSaturation]);
+  console.log(reachingProbability);
+  console.log(trafficSignalSaturation);
 
   function predictSignalTiming(greenDuration, redDuration, currentTime) {
     // Total duration of one cycle
@@ -251,11 +265,12 @@ export default function LandingPage({ params }) {
     if (elapsedTime < greenDuration) {
       // If elapsed time is within the green signal duration
       currentSignal = "Green";
-      greenWindow = greenDuration - elapsedTime - 5; // time to reach signal to have 5 seconds to cross the signal
+      greenWindow = greenDuration - elapsedTime - greenDuration * 0.25; // time to reach signal to have 5 seconds to cross the signal
     } else {
       // If elapsed time exceeds green signal duration, it's in the red signal phase
       currentSignal = "Red";
-      greenWindow = cycleDuration - elapsedTime + greenDuration - 5; // time to reach signal to have 5 seconds to cross the signalss
+      greenWindow =
+        cycleDuration - elapsedTime + greenDuration - greenDuration * 0.25; // time to reach signal to have 5 seconds to cross the signalss
     }
     return {
       currentSignal: currentSignal,
@@ -267,6 +282,10 @@ export default function LandingPage({ params }) {
     setOptimizing(flag);
   }
 
+  function getCurrentSpeedFromFooter(speed) {
+    // console.log(speed);
+    setCurrentSpeed(speed);
+  }
   useEffect(() => {
     setUserData(JSON.parse(decodeURIComponent(params.session)).user);
     setTimeout(() => {
@@ -476,6 +495,8 @@ export default function LandingPage({ params }) {
             getOptimizing={getOptimizing}
             predictedSpeed={predictedSpeed}
             trafficSignalSaturation={trafficSignalSaturation}
+            getCurrentSpeedFromFooter={getCurrentSpeedFromFooter}
+            reachingProbability={reachingProbability}
           />
         )}
       </div>

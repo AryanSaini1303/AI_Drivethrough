@@ -17,7 +17,9 @@ export default function FooterComponent({
   setClearRouteFlag,
   getOptimizing,
   predictedSpeed,
-  trafficSignalSaturation
+  trafficSignalSaturation,
+  getCurrentSpeedFromFooter,
+  reachingProbability
 }) {
   const [loadingDelay, setLoadingDelay] = useState(5);
   const [optimizing, setOptimizing] = useState(false);
@@ -57,7 +59,9 @@ export default function FooterComponent({
               const { latitude, longitude } = position.coords;
               const speed=position.coords.speed;
               // console.log(speed);
-              setSpeed(Math.floor((speed * 3.6).toFixed(2)));
+              const midSpeed=Math.floor((speed * 3.6).toFixed(2))
+              setSpeed(midSpeed*1.1);
+              getCurrentSpeedFromFooter(speed);
               setCarPosition({ lat: latitude, lng: longitude });
               // setCenterLat(latitude);
               // setCenterLng(longitude);
@@ -154,7 +158,7 @@ export default function FooterComponent({
         </svg>
       </button>
       {optimized ? (
-        <SpeedDials speed={speed} predictedSpeed={predictedSpeed} trafficSignalSaturation={trafficSignalSaturation}/>
+        <SpeedDials speed={speed} predictedSpeed={predictedSpeed} trafficSignalSaturation={trafficSignalSaturation} reachingProbability={reachingProbability}/>
       ) : (
         <button
           onClick={startNavigation}
