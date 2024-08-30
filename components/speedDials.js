@@ -1,22 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
 import styles from "./speedDials.module.css";
-
 export default function SpeedDials({
   speed,
   predictedSpeed,
   trafficSignalSaturation,
   reachingProbability,
 }) {
-  const [predictedSpeedNext, setPredictedSpeedNext] = useState(predictedSpeed);
+  const [predictedSpeedNext, setPredictedSpeedNext] = useState(0);
   useEffect(() => {
-    // Set a timeout to update predictedSpeedNext after 2 seconds
-    const timer = setTimeout(() => {
+    let timer = setTimeout(() => {
       setPredictedSpeedNext(predictedSpeed);
     }, 2000);
-    // Cleanup the timeout if predictedSpeed changes before the timeout completes
     return () => clearTimeout(timer);
   }, [predictedSpeed]);
+  console.log(reachingProbability);
   return (
     <div className={styles.container}>
       <div
