@@ -198,7 +198,7 @@ export default function LandingPage({ params }) {
                     while (true) {
                       if (
                         upcomingSignalDistance / signalInfo.greenWindow >
-                          80 / 3.6
+                          55 / 3.6
                       ) {
                         signalInfo.greenWindow += greenDuration + redDuration;
                         continue;
