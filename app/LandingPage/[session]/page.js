@@ -70,7 +70,7 @@ export default function LandingPage({ params }) {
   const [trafficSignalSaturation, setTrafficSignalSaturation] = useState(false);
   const [currentSpeed, setCurrentSpeed] = useState(0);
   const [reachingProbability, setReachingProbability] = useState();
-  const [isOptimized,setIsOptimized]=useState(false);
+  const [isOptimized, setIsOptimized] = useState(false);
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
@@ -124,62 +124,66 @@ export default function LandingPage({ params }) {
   }
 
   useEffect(() => {
-    if (directionsResponse1&&optimizing) {
-      setCenterLat(userLocation1.lat);
-      setCenterLng(userLocation1.lng); // uncomment this to autocenter map while navigation
-      const userLocation = new google.maps.LatLng(userLocation1);
-      const service = new google.maps.DistanceMatrixService();
-      const maxDestinations = 25; // Google Maps API limit
-      const destinationChunks = chunkArray(trafficLights, maxDestinations);
-      destinationChunks.forEach((chunk, chunkIndex) => {
-        const destinations = chunk.map(
-          (signal) => new google.maps.LatLng(signal.latitude, signal.longitude)
-        );
-        service.getDistanceMatrix(
-          {
-            origins: [userLocation],
-            destinations: destinations,
-            travelMode: google.maps.TravelMode.DRIVING,
-          },
-          (response, status) => {
-            if (status === "OK") {
-              let newTrafficLights = [];
-              // Combine results with their corresponding traffic light data
-              let combinedArray = response.rows[0].elements.map(
-                (result, index) => ({
-                  result,
-                  trafficLight:
-                    trafficLights[chunkIndex * maxDestinations + index],
-                })
-              );
-              // Filter out traffic lights that are within 50 meters
-              combinedArray = combinedArray.filter(
-                (item) => item.result.distance.value > 50
-              );
-              // Sort the remaining traffic lights by distance
-              combinedArray.sort(
-                (a, b) => a.result.distance.value - b.result.distance.value
-              );
-              // Update the trafficLights state with the filtered and sorted traffic lights
-              newTrafficLights = combinedArray.map((item) => item.trafficLight);
-              // Set the updated traffic lights
-              setTrafficLights((prevTrafficLights) => {
-                const updatedTrafficLights = [...prevTrafficLights];
-                updatedTrafficLights.splice(
-                  chunkIndex * maxDestinations,
-                  chunk.length,
-                  ...newTrafficLights
+    let timer = setTimeout(() => {
+      if (directionsResponse1 && optimizing) {
+        setCenterLat(userLocation1.lat);
+        setCenterLng(userLocation1.lng); // uncomment this to autocenter map while navigation
+        const userLocation = new google.maps.LatLng(userLocation1);
+        const service = new google.maps.DistanceMatrixService();
+        const maxDestinations = 25; // Google Maps API limit
+        const destinationChunks = chunkArray(trafficLights, maxDestinations);
+        destinationChunks.forEach((chunk, chunkIndex) => {
+          const destinations = chunk.map(
+            (signal) =>
+              new google.maps.LatLng(signal.latitude, signal.longitude)
+          );
+          service.getDistanceMatrix(
+            {
+              origins: [userLocation],
+              destinations: destinations,
+              travelMode: google.maps.TravelMode.DRIVING,
+            },
+            (response, status) => {
+              if (status === "OK") {
+                let newTrafficLights = [];
+                // Combine results with their corresponding traffic light data
+                let combinedArray = response.rows[0].elements.map(
+                  (result, index) => ({
+                    result,
+                    trafficLight:
+                      trafficLights[chunkIndex * maxDestinations + index],
+                  })
                 );
-                return updatedTrafficLights;
-              });
-              if (combinedArray && combinedArray.length !== 0) {
-                console.log(combinedArray);
-                const upcomingSignalDistance =
-                  combinedArray[0].result.distance.value;
-                const greenDuration =
-                  combinedArray[0].trafficLight.greenDuration;
-                const redDuration = combinedArray[0].trafficLight.redDuration;
-                const initialTime = combinedArray[0].trafficLight.initialTime;
+                // Filter out traffic lights that are within 50 meters
+                combinedArray = combinedArray.filter(
+                  (item) => item.result.distance.value > 50
+                );
+                // Sort the remaining traffic lights by distance
+                combinedArray.sort(
+                  (a, b) => a.result.distance.value - b.result.distance.value
+                );
+                // Update the trafficLights state with the filtered and sorted traffic lights
+                newTrafficLights = combinedArray.map(
+                  (item) => item.trafficLight
+                );
+                // Set the updated traffic lights
+                setTrafficLights((prevTrafficLights) => {
+                  const updatedTrafficLights = [...prevTrafficLights];
+                  updatedTrafficLights.splice(
+                    chunkIndex * maxDestinations,
+                    chunk.length,
+                    ...newTrafficLights
+                  );
+                  return updatedTrafficLights;
+                });
+                if (combinedArray && combinedArray.length !== 0) {
+                  console.log(combinedArray);
+                  const upcomingSignalDistance =
+                    combinedArray[0].result.distance.value;
+                  const greenDuration =
+                    combinedArray[0].trafficLight.greenDuration;
+                  const redDuration = combinedArray[0].trafficLight.redDuration;
+                  const initialTime = combinedArray[0].trafficLight.initialTime;
                   setInterval(() => {
                     const currentTimeHours = new Date().getHours();
                     const currentTimeMinutes = new Date().getMinutes();
@@ -198,7 +202,7 @@ export default function LandingPage({ params }) {
                     while (true) {
                       if (
                         upcomingSignalDistance / signalInfo.greenWindow >
-                          80 / 3.6
+                        80 / 3.6
                       ) {
                         signalInfo.greenWindow += greenDuration + redDuration;
                         continue;
@@ -207,7 +211,8 @@ export default function LandingPage({ params }) {
                         setPredictedSpeed(
                           upcomingSignalDistance / signalInfo.greenWindow
                         );
-                        const eta = upcomingSignalDistance / (currentSpeed / 3.6);
+                        const eta =
+                          upcomingSignalDistance / (currentSpeed / 3.6);
                         console.log(eta);
                         const timeDifference = Math.sqrt(
                           (eta - signalInfo.greenWindow) *
@@ -236,17 +241,19 @@ export default function LandingPage({ params }) {
                     //   `You have ${signalInfo.greenWindow} seconds to reach the signal so you don't have to wait 😁`
                     // );
                   }, 1000);
+                } else {
+                  setTrafficSignalSaturation(true);
+                  setReachingProbability(100);
+                }
               } else {
-                setTrafficSignalSaturation(true);
-                setReachingProbability(100);
+                console.error("DistanceMatrixService failed due to: " + status);
               }
-            } else {
-              console.error("DistanceMatrixService failed due to: " + status);
             }
-          }
-        );
-      });
-    }
+          );
+        });
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
   }, [userLocation1, trafficSignalSaturation]);
   console.log(reachingProbability);
   console.log(trafficSignalSaturation);
@@ -265,8 +272,7 @@ export default function LandingPage({ params }) {
     } else {
       // If elapsed time exceeds green signal duration, it's in the red signal phase
       currentSignal = "Red";
-      greenWindow =
-        cycleDuration - elapsedTime + greenDuration; // time to reach signal to have 5 seconds to cross the signalss
+      greenWindow = cycleDuration - elapsedTime + greenDuration; // time to reach signal to have 5 seconds to cross the signalss
     }
     return {
       currentSignal: currentSignal,
@@ -293,7 +299,7 @@ export default function LandingPage({ params }) {
     }, 1000);
   }, [status]);
 
-  function getOptimizedFromFooter(flag){
+  function getOptimizedFromFooter(flag) {
     setIsOptimized(flag);
   }
 
