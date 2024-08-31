@@ -311,7 +311,6 @@ export default function LandingPage({ params }) {
   if (status === "unauthenticated") {
     return "Unauthenticated";
   }
-console.log(drag);
   const mapStyles = [
     { elementType: "geometry", stylers: [{ color: "#212121" }] },
     { elementType: "labels.icon", stylers: [{ visibility: "on" }] },
