@@ -79,6 +79,7 @@ export default function LandingPage({ params }) {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
   };
+  const [drag,setDrag]=useState(false);
 
   // Get current position of the user
   function getCoords(position) {
@@ -281,6 +282,7 @@ export default function LandingPage({ params }) {
 
   function getOptimizing(flag) {
     setOptimizing(flag);
+    setDrag(false);
   }
 
   function getCurrentSpeedFromFooter(speed) {
@@ -309,7 +311,7 @@ export default function LandingPage({ params }) {
   if (status === "unauthenticated") {
     return "Unauthenticated";
   }
-
+console.log(drag);
   const mapStyles = [
     { elementType: "geometry", stylers: [{ color: "#212121" }] },
     { elementType: "labels.icon", stylers: [{ visibility: "on" }] },
@@ -428,7 +430,7 @@ export default function LandingPage({ params }) {
         />
 
         <GoogleMap
-          center={center}
+          center={!drag?center:null}
           zoom={15}
           mapContainerStyle={{ width: "100vw", height: "100vh" }}
           options={{
@@ -442,6 +444,7 @@ export default function LandingPage({ params }) {
           onLoad={(map) => {
             setMap(map);
           }}
+          onDrag={(()=>{!navigationFlag&&setDrag(true)})}
         >
           {directionsResponse1 && (
             <>
