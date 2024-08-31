@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import style from "./page.module.css";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -70,7 +70,11 @@ export default function LandingPage({ params }) {
   const [trafficSignalSaturation, setTrafficSignalSaturation] = useState(false);
   const [currentSpeed, setCurrentSpeed] = useState(0);
   const [reachingProbability, setReachingProbability] = useState();
-  const [isOptimized, setIsOptimized] = useState(false);
+  const [displayInfo, setDisplayInfo] = useState({});
+  const [eta, setEta] = useState();
+  const [timeDifference, setTimeDifference] = useState();
+  const [currentTrafficLightsLeft, setCurrentTrafficLightsLeft] = useState();
+  const currentTrafficLightsLeftRef = useRef(currentTrafficLightsLeft);
   const center = {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
@@ -78,7 +82,6 @@ export default function LandingPage({ params }) {
 
   // Get current position of the user
   function getCoords(position) {
-    console.log('here');
     setUserLocation1({
       lat: position.coords.latitude,
       lng: position.coords.longitude,
@@ -88,9 +91,6 @@ export default function LandingPage({ params }) {
       setCenterLng(position.coords.longitude);
     } // uncomment this to autocenter while navigation
   }
-  useEffect(() => {
-    console.log(userLocation1);
-  }, [userLocation1]);
 
   function chunkArray(array, chunkSize) {
     const chunks = [];
@@ -102,7 +102,6 @@ export default function LandingPage({ params }) {
 
   // Handle response from Google Directions API
   function getDirectionsResponse(response) {
-    // console.log(response);
     if (response) {
       setDirectionsResponse1(response);
       const route = response.routes[0];
@@ -125,8 +124,8 @@ export default function LandingPage({ params }) {
   }
 
   useEffect(() => {
-    let timer = setTimeout(() => {
-      if (directionsResponse1&&!trafficSignalSaturation) {
+    // let timer = setTimeout(() => {
+      if (directionsResponse1 && !trafficSignalSaturation) {
         setCenterLat(userLocation1.lat);
         setCenterLng(userLocation1.lng); // uncomment this to autocenter map while navigation
         const userLocation = new google.maps.LatLng(userLocation1);
@@ -146,8 +145,6 @@ export default function LandingPage({ params }) {
             },
             (response, status) => {
               if (status === "OK") {
-                let newTrafficLights = [];
-                // Combine results with their corresponding traffic light data
                 let combinedArray = response.rows[0].elements.map(
                   (result, index) => ({
                     result,
@@ -159,92 +156,22 @@ export default function LandingPage({ params }) {
                 combinedArray = combinedArray.filter(
                   (item) => item.result.distance.value > 50
                 );
+                setCurrentTrafficLightsLeft(combinedArray);
                 // Sort the remaining traffic lights by distance
                 combinedArray.sort(
                   (a, b) => a.result.distance.value - b.result.distance.value
                 );
-                // Update the trafficLights state with the filtered and sorted traffic lights
-                newTrafficLights = combinedArray.map(
-                  (item) => item.trafficLight
-                );
-                // Set the updated traffic lights
+                // Update the trafficLights state with the filtered traffic lights
                 setTrafficLights((prevTrafficLights) => {
                   const updatedTrafficLights = [...prevTrafficLights];
+                  // Remove the signals that were filtered out
                   updatedTrafficLights.splice(
                     chunkIndex * maxDestinations,
                     chunk.length,
-                    ...newTrafficLights
+                    ...combinedArray.map((item) => item.trafficLight)
                   );
                   return updatedTrafficLights;
                 });
-                if (combinedArray && combinedArray.length !== 0) {
-                  const upcomingSignalDistance =
-                    combinedArray[0].result.distance.value;
-                  const greenDuration =
-                    combinedArray[0].trafficLight.greenDuration;
-                  const redDuration = combinedArray[0].trafficLight.redDuration;
-                  const initialTime = combinedArray[0].trafficLight.initialTime;
-                  setInterval(() => {
-                    const currentTimeHours = new Date().getHours();
-                    const currentTimeMinutes = new Date().getMinutes();
-                    const currentTimeSeconds = new Date().getSeconds();
-                    const currentTime =
-                      currentTimeHours * 3600 +
-                      currentTimeMinutes * 60 +
-                      currentTimeSeconds; // Current time in seconds
-                    const actualCurrentTime =
-                      (currentTime - initialTime + 86400) % 86400; // Ensure the time is non-negative and wraps around a 24-hour clock
-                    const signalInfo = predictSignalTiming(
-                      greenDuration,
-                      redDuration,
-                      actualCurrentTime
-                    );
-                    while (true) {
-                      if (
-                        upcomingSignalDistance / signalInfo.greenWindow >
-                        80 / 3.6
-                      ) {
-                        signalInfo.greenWindow += greenDuration + redDuration;
-                        continue;
-                      } else {
-                        console.log(signalInfo.greenWindow);
-                        setPredictedSpeed(
-                          upcomingSignalDistance / signalInfo.greenWindow
-                        );
-                        const eta =
-                          upcomingSignalDistance / (currentSpeed / 3.6);
-                        console.log(eta);
-                        const timeDifference = Math.sqrt(
-                          (eta - signalInfo.greenWindow) *
-                            (eta - signalInfo.greenWindow)
-                        );
-                        console.log(timeDifference);
-                        if (
-                          timeDifference > greenDuration * 0.25 &&
-                          timeDifference < greenDuration - greenDuration * 0.25
-                        ) {
-                          setReachingProbability(100);
-                        } else if (
-                          (timeDifference >
-                            greenDuration - greenDuration * 0.25 &&
-                            timeDifference < greenDuration) ||
-                          (timeDifference > 0 &&
-                            timeDifference < greenDuration * 0.25)
-                        ) {
-                          setReachingProbability(25);
-                        }
-                        break;
-                      }
-                    }
-                    // console.log(`Current Signal: ${signalInfo.currentSignal}`);
-                    // console.log(
-                    //   `You have ${signalInfo.greenWindow} seconds to reach the signal so you don't have to wait 😁`
-                    // );
-                  }, 1000);
-                } else {
-                  setTrafficSignalSaturation(true);
-                  setReachingProbability(100);
-                }
               } else {
                 console.error("DistanceMatrixService failed due to: " + status);
               }
@@ -252,9 +179,83 @@ export default function LandingPage({ params }) {
           );
         });
       }
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [userLocation1, trafficSignalSaturation]);
+    // }, 1000);
+    // return () => clearTimeout(timer);
+  }, [userLocation1, directionsResponse1]);
+
+  // Update the ref whenever currentTrafficLightsLeft changes
+  useEffect(() => {
+    currentTrafficLightsLeftRef.current = currentTrafficLightsLeft;
+  }, [currentTrafficLightsLeft]);
+
+  useEffect(() => {
+    // Process the traffic lights
+    const intervalId = setInterval(() => {
+      if (directionsResponse1) {
+        const trafficLights = currentTrafficLightsLeftRef.current;
+        if (trafficLights && trafficLights.length !== 0) {
+          const upcomingSignalDistance = trafficLights[0].result.distance.value;
+          const greenDuration = trafficLights[0].trafficLight.greenDuration;
+          const redDuration = trafficLights[0].trafficLight.redDuration;
+          const initialTime = trafficLights[0].trafficLight.initialTime;
+          const currentTimeHours = new Date().getHours();
+          const currentTimeMinutes = new Date().getMinutes();
+          const currentTimeSeconds = new Date().getSeconds();
+          const currentTime =
+            currentTimeHours * 3600 +
+            currentTimeMinutes * 60 +
+            currentTimeSeconds; // Current time in seconds
+          const actualCurrentTime = (currentTime - initialTime + 86400) % 86400; // Ensure the time is non-negative and wraps around a 24-hour clock
+          const signalInfo = predictSignalTiming(
+            greenDuration,
+            redDuration,
+            actualCurrentTime
+          );
+          while (true) {
+            if (upcomingSignalDistance / signalInfo.greenWindow > 80 / 3.6) {
+              signalInfo.greenWindow += greenDuration + redDuration;
+              continue;
+            } else {
+              setPredictedSpeed(upcomingSignalDistance / signalInfo.greenWindow);
+              const eta =
+                upcomingSignalDistance /
+                (currentSpeed ? currentSpeed : (50 * 1.1) / 3.6);
+              setEta(eta);
+              const timeDifference = Math.sqrt(
+                (eta - signalInfo.greenWindow) * (eta - signalInfo.greenWindow)
+              );
+              setTimeDifference(timeDifference);
+              if (
+                timeDifference > greenDuration * 0.25 &&
+                timeDifference < greenDuration - greenDuration * 0.25
+              ) {
+                setReachingProbability(100);
+              } else if (
+                (timeDifference > greenDuration - greenDuration * 0.25 &&
+                  timeDifference < greenDuration) ||
+                (timeDifference > 0 && timeDifference < greenDuration * 0.25)
+              ) {
+                setReachingProbability(25);
+              } else {
+                setReachingProbability(101);
+              }
+              break;
+            }
+          }
+          setDisplayInfo({
+            current_speed: currentSpeed ? currentSpeed : 50 * 1.1,
+            signal_status: signalInfo.currentSignal,
+            remaining_distance: upcomingSignalDistance,
+            green_window: signalInfo.greenWindow,
+          });
+        } else {
+          setTrafficSignalSaturation(true);
+          setReachingProbability(100);
+          clearInterval(intervalId);
+        }
+      }
+    }, 1000)
+  }, [userLocation1, directionsResponse1]);
 
   function predictSignalTiming(greenDuration, redDuration, currentTime) {
     // Total duration of one cycle
@@ -283,7 +284,6 @@ export default function LandingPage({ params }) {
   }
 
   function getCurrentSpeedFromFooter(speed) {
-    // console.log(speed);
     setCurrentSpeed(speed);
   }
   useEffect(() => {
@@ -296,10 +296,6 @@ export default function LandingPage({ params }) {
       }
     }, 1000);
   }, [status]);
-
-  function getOptimizedFromFooter(flag) {
-    setIsOptimized(flag);
-  }
 
   const geo = navigator.geolocation;
   setInterval(() => {
@@ -501,9 +497,62 @@ export default function LandingPage({ params }) {
             trafficSignalSaturation={trafficSignalSaturation}
             getCurrentSpeedFromFooter={getCurrentSpeedFromFooter}
             reachingProbability={reachingProbability}
-            getOptimizedFromFooter={getOptimizedFromFooter}
           />
         )}
+
+        <section
+          className="info"
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            position: "absolute",
+            zIndex: "100000",
+            bottom: "5.5rem",
+            left: "0",
+            color: "white",
+            backgroundColor: "black",
+            borderRadius: "10px",
+            padding: "0.5rem",
+            alignItems: "center",
+          }}
+        >
+          <div className="signal">
+            <div
+              className="signal"
+              style={{
+                backgroundColor: `${displayInfo.signal_status}`,
+                height: "2rem",
+                width: "2rem",
+                borderRadius: "50%",
+              }}
+            ></div>
+          </div>
+          <div className="values">
+            <h6 style={{ margin: "0", fontWeight: "400" }}>
+              Current Speed:{" "}
+              {displayInfo.current_speed
+                ? `${displayInfo.current_speed.toFixed(2)} kmph`
+                : "--"}
+            </h6>
+            <h6 style={{ margin: "0", fontWeight: "400" }}>
+              ETA: {eta ? `${eta.toFixed(2)}s` : "--"}
+            </h6>
+            <h6 style={{ margin: "0", fontWeight: "400" }}>
+              Rem. Distance:{" "}
+              {displayInfo.remaining_distance
+                ? `${displayInfo.remaining_distance}m`
+                : "--"}
+            </h6>
+            <h6 style={{ margin: "0", fontWeight: "400" }}>
+              Time Diff.:{" "}
+              {timeDifference ? `${timeDifference.toFixed(2)}s` : "--"}
+            </h6>
+            <h6 style={{ margin: "0", fontWeight: "400" }}>
+              Green Window:{" "}
+              {displayInfo.green_window ? `${displayInfo.green_window}s` : "--"}
+            </h6>
+          </div>
+        </section>
       </div>
     )
   );

@@ -20,7 +20,6 @@ export default function FooterComponent({
   trafficSignalSaturation,
   getCurrentSpeedFromFooter,
   reachingProbability,
-  getOptimizedFromFooter
 }) {
   const [loadingDelay, setLoadingDelay] = useState(5);
   const [optimizing, setOptimizing] = useState(false);
@@ -48,7 +47,6 @@ export default function FooterComponent({
       setTimeout(() => {
         setOptimized(true);
         setOptimizing(false);
-        getOptimizedFromFooter(true);
         if (watchId) {
           // console.log("Clearing previous watchId:", watchId);
           navigator.geolocation.clearWatch(watchId);
@@ -59,11 +57,11 @@ export default function FooterComponent({
           const id = navigator.geolocation.watchPosition(
             (position) => {
               const { latitude, longitude } = position.coords;
-              const speed=position.coords.speed;
-              // console.log(speed);
-              const midSpeed=Math.floor((speed * 3.6).toFixed(2))
-              setSpeed(midSpeed*1.1);
-              getCurrentSpeedFromFooter(speed);
+              let currentSpeed=position.coords.speed;
+              currentSpeed=(currentSpeed);
+              console.log(currentSpeed);
+              setSpeed(currentSpeed*1.1);
+              getCurrentSpeedFromFooter(currentSpeed);
               setCarPosition({ lat: latitude, lng: longitude });
               // setCenterLat(latitude);
               // setCenterLng(longitude);
@@ -125,7 +123,6 @@ export default function FooterComponent({
     setDirectionsResponse1(null);
     setClearRouteFlag(true);
     setOptimized(false);
-    getOptimizedFromFooter(false);
     // Stop the geolocation watch if it exists
     if (watchId) {
       navigator.geolocation.clearWatch(watchId);

@@ -16,6 +16,14 @@
     "name":"Sohna Om Sweets"
 },
   {
+    "latitude": 28.242144849271867,
+    "longitude": 77.07118183214386,
+    "greenDuration":25,
+    "redDuration":63,
+    "initialTime":57046,
+    "name":"Sohna Chowk Royal Gym Intersection"
+},
+  {
     "id": "node",
     "latitude": 28.4616968,
     "longitude": 77.0870179,
