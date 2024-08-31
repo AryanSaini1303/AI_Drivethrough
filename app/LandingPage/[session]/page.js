@@ -243,7 +243,8 @@ export default function LandingPage({ params }) {
             }
           }
           setDisplayInfo({
-            current_speed: currentSpeed ? currentSpeed : 50 * 1.1,
+            current_speed: currentSpeed,
+            // current_speed:(50 * 1.1) / 3.6,
             signal_status: signalInfo.currentSignal,
             remaining_distance: upcomingSignalDistance,
             green_window: signalInfo.greenWindow,
