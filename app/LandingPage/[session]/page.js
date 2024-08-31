@@ -218,9 +218,8 @@ export default function LandingPage({ params }) {
               continue;
             } else {
               setPredictedSpeed(upcomingSignalDistance / signalInfo.greenWindow);
-              const eta =
-                upcomingSignalDistance /
-                (currentSpeed!==null ? currentSpeed : (50 * 1.1) / 3.6);
+              // const eta = upcomingSignalDistance / ((50 * 1.1) / 3.6);
+              const eta=upcomingSignalDistance/currentSpeed;
               setEta(eta);
               const timeDifference = Math.sqrt(
                 (eta - signalInfo.greenWindow) * (eta - signalInfo.greenWindow)
