@@ -20,6 +20,7 @@ export default function FooterComponent({
   trafficSignalSaturation,
   getCurrentSpeedFromFooter,
   reachingProbability,
+  setDrag
 }) {
   const [loadingDelay, setLoadingDelay] = useState(5);
   const [optimizing, setOptimizing] = useState(false);
@@ -143,6 +144,7 @@ export default function FooterComponent({
         type="button"
         onClick={() => {
           map.panTo(center);
+          setDrag(false);
         }}
         style={
           optimized

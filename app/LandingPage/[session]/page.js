@@ -444,7 +444,7 @@ console.log(drag);
           onLoad={(map) => {
             setMap(map);
           }}
-          onDrag={(()=>{!navigationFlag&&setDrag(true)})}
+          onDrag={(()=>{setDrag(true)})}
         >
           {directionsResponse1 && (
             <>
@@ -500,6 +500,7 @@ console.log(drag);
             trafficSignalSaturation={trafficSignalSaturation}
             getCurrentSpeedFromFooter={getCurrentSpeedFromFooter}
             reachingProbability={reachingProbability}
+            setDrag={setDrag}
           />
         )}
 
