@@ -1887,30 +1887,45 @@
     "id":"node",
     "latitude":13.147638687897423,
     "longitude":77.56970481015459,
-    "degree":4
+    "degree":4,
+    "greenDuration": 30,
+    "redDuration": 99,
+    "initialTime": 14400
   },
   {
     "id":"node",
     "latitude":13.157634911531721,
     "longitude":77.56716557514463,
-    "degree":4
+    "degree":4,
+    "greenDuration": 30,
+    "redDuration": 99,
+    "initialTime": 14400
   },
   {
     "id":"node",
     "latitude":13.172942529181604,
     "longitude":77.56430179999123,
-    "degree":3
+    "degree":3,
+    "greenDuration": 30,
+    "redDuration": 99,
+    "initialTime": 14400
   },
   {
     "id":"node",
     "latitude":13.130052588055337,
     "longitude":77.57148891949579,
-    "degree":4
+    "degree":4,
+    "greenDuration": 30,
+    "redDuration": 99,
+    "initialTime": 14400
   },
   {
     "id":"node",
     "latitude":13.114987253552215,
     "longitude":77.57886641427118,
-    "degree":2
+    "degree":2,
+    "greenDuration": 30,
+    "redDuration": 99,
+    "initialTime": 14400
   }
 ]
