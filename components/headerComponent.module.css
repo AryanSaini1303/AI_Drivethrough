@@ -12,12 +12,12 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.6rem;
-  margin: 0.6rem 0;
+  margin: 0.6rem 1.2rem;
 }
 .container form input {
-  width: 77vw;
+  width: 64vw;
   font-size: 0.7rem;
   padding: 0.6rem 0.8rem;
   background-color: white;
@@ -35,7 +35,7 @@
 .originInputContainer {
   position: relative;
 }
-.originInputContainer button {
+.originInputContainer .originSubmitButton {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -112,4 +112,36 @@
   justify-content: center;
   align-items: center;
   animation: reveal 0.2s ease-in-out forwards;
+}
+.logoutNprofile div{
+  height: 2.1rem;
+  width: 2.1rem;
+  border: 2px white solid;
+  /* background-color: red; */
+  border-radius: 50%;
+  transition: all 0.2s linear;
+}
+.logoutNprofile{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  position: absolute;
+  right: -3.8rem;
+}
+.logoutNprofile>div>*{
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+  box-shadow: 0 0 0.5rem black;
+}
+.logoutNprofile div:nth-child(2) button{
+  transform: rotate(-90deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.logoutNprofile div:nth-child(2):active{
+  opacity: 0.5;
 }

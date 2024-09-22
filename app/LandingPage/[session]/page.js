@@ -530,7 +530,7 @@ export default function LandingPage({ params }) {
               }}
             ></div>
           </div>
-          <div className="values">
+          {/* <div className="values">
             <h6 style={{ margin: "0", fontWeight: "400" }}>
               Current Speed:{" "}
               {displayInfo.current_speed
@@ -554,7 +554,7 @@ export default function LandingPage({ params }) {
               Green Window:{" "}
               {displayInfo.green_window ? `${displayInfo.green_window}s` : "--"}
             </h6>
-          </div>
+          </div> */}
         </section>
       </div>
     )
