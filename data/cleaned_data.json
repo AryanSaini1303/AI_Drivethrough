@@ -1933,8 +1933,8 @@
     "latitude": 30.416781368433455,
     "longitude": 77.96771821024159,
     "degree": 2,
-    "greenDuration": 27,
+    "greenDuration": 30,
     "redDuration": 30,
-    "initialTime": 14400
+    "initialTime": 42284
   }
 ]
