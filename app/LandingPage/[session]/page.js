@@ -79,7 +79,8 @@ export default function LandingPage({ params }) {
     lat: centerlat ?? 28.4595, // Default to a known latitude if not set
     lng: centerlng ?? 77.0266, // Default to a known longitude if not set
   };
-  const [drag,setDrag]=useState(false);
+  const [drag, setDrag] = useState(false);
+  const [optimizedFlag, setOptimizedFlag] = useState(false);
 
   // Get current position of the user
   function getCoords(position) {
@@ -126,60 +127,59 @@ export default function LandingPage({ params }) {
 
   useEffect(() => {
     // let timer = setTimeout(() => {
-      if (directionsResponse1 && !trafficSignalSaturation) {
-        setCenterLat(userLocation1.lat);
-        setCenterLng(userLocation1.lng); // uncomment this to autocenter map while navigation
-        const userLocation = new google.maps.LatLng(userLocation1);
-        const service = new google.maps.DistanceMatrixService();
-        const maxDestinations = 25; // Google Maps API limit
-        const destinationChunks = chunkArray(trafficLights, maxDestinations);
-        destinationChunks.forEach((chunk, chunkIndex) => {
-          const destinations = chunk.map(
-            (signal) =>
-              new google.maps.LatLng(signal.latitude, signal.longitude)
-          );
-          service.getDistanceMatrix(
-            {
-              origins: [userLocation],
-              destinations: destinations,
-              travelMode: google.maps.TravelMode.DRIVING,
-            },
-            (response, status) => {
-              if (status === "OK") {
-                let combinedArray = response.rows[0].elements.map(
-                  (result, index) => ({
-                    result,
-                    trafficLight:
-                      trafficLights[chunkIndex * maxDestinations + index],
-                  })
+    if (directionsResponse1 && !trafficSignalSaturation) {
+      setCenterLat(userLocation1.lat);
+      setCenterLng(userLocation1.lng); // uncomment this to autocenter map while navigation
+      const userLocation = new google.maps.LatLng(userLocation1);
+      const service = new google.maps.DistanceMatrixService();
+      const maxDestinations = 25; // Google Maps API limit
+      const destinationChunks = chunkArray(trafficLights, maxDestinations);
+      destinationChunks.forEach((chunk, chunkIndex) => {
+        const destinations = chunk.map(
+          (signal) => new google.maps.LatLng(signal.latitude, signal.longitude)
+        );
+        service.getDistanceMatrix(
+          {
+            origins: [userLocation],
+            destinations: destinations,
+            travelMode: google.maps.TravelMode.DRIVING,
+          },
+          (response, status) => {
+            if (status === "OK") {
+              let combinedArray = response.rows[0].elements.map(
+                (result, index) => ({
+                  result,
+                  trafficLight:
+                    trafficLights[chunkIndex * maxDestinations + index],
+                })
+              );
+              // Filter out traffic lights that are within 50 meters
+              combinedArray = combinedArray.filter(
+                (item) => item.result.distance.value > 50
+              );
+              setCurrentTrafficLightsLeft(combinedArray);
+              // Sort the remaining traffic lights by distance
+              combinedArray.sort(
+                (a, b) => a.result.distance.value - b.result.distance.value
+              );
+              // Update the trafficLights state with the filtered traffic lights
+              setTrafficLights((prevTrafficLights) => {
+                const updatedTrafficLights = [...prevTrafficLights];
+                // Remove the signals that were filtered out
+                updatedTrafficLights.splice(
+                  chunkIndex * maxDestinations,
+                  chunk.length,
+                  ...combinedArray.map((item) => item.trafficLight)
                 );
-                // Filter out traffic lights that are within 50 meters
-                combinedArray = combinedArray.filter(
-                  (item) => item.result.distance.value > 50
-                );
-                setCurrentTrafficLightsLeft(combinedArray);
-                // Sort the remaining traffic lights by distance
-                combinedArray.sort(
-                  (a, b) => a.result.distance.value - b.result.distance.value
-                );
-                // Update the trafficLights state with the filtered traffic lights
-                setTrafficLights((prevTrafficLights) => {
-                  const updatedTrafficLights = [...prevTrafficLights];
-                  // Remove the signals that were filtered out
-                  updatedTrafficLights.splice(
-                    chunkIndex * maxDestinations,
-                    chunk.length,
-                    ...combinedArray.map((item) => item.trafficLight)
-                  );
-                  return updatedTrafficLights;
-                });
-              } else {
-                console.error("DistanceMatrixService failed due to: " + status);
-              }
+                return updatedTrafficLights;
+              });
+            } else {
+              console.error("DistanceMatrixService failed due to: " + status);
             }
-          );
-        });
-      }
+          }
+        );
+      });
+    }
     // }, 1000);
     // return () => clearTimeout(timer);
   }, [userLocation1, directionsResponse1]);
@@ -217,9 +217,11 @@ export default function LandingPage({ params }) {
               signalInfo.greenWindow += greenDuration + redDuration;
               continue;
             } else {
-              setPredictedSpeed(upcomingSignalDistance / signalInfo.greenWindow);
+              setPredictedSpeed(
+                upcomingSignalDistance / signalInfo.greenWindow
+              );
               // const eta = upcomingSignalDistance / ((50 * 1.1) / 3.6);
-              const eta=upcomingSignalDistance/currentSpeed;
+              const eta = upcomingSignalDistance / currentSpeed;
               setEta(eta);
               const timeDifference = Math.sqrt(
                 (eta - signalInfo.greenWindow) * (eta - signalInfo.greenWindow)
@@ -255,7 +257,7 @@ export default function LandingPage({ params }) {
           clearInterval(intervalId);
         }
       }
-    }, 1000)
+    }, 1000);
   }, [userLocation1, directionsResponse1]);
 
   function predictSignalTiming(greenDuration, redDuration, currentTime) {
@@ -307,6 +309,10 @@ export default function LandingPage({ params }) {
   useEffect(() => {
     setCarPosition(null);
   }, [clearRouteFlag]);
+
+  function getOptimized(flag) {
+    setOptimizedFlag(flag);
+  }
 
   if (status === "unauthenticated") {
     return "Unauthenticated";
@@ -429,7 +435,7 @@ export default function LandingPage({ params }) {
         />
 
         <GoogleMap
-          center={!drag?center:null}
+          center={!drag ? center : null}
           zoom={15}
           mapContainerStyle={{ width: "100vw", height: "100vh" }}
           options={{
@@ -443,7 +449,9 @@ export default function LandingPage({ params }) {
           onLoad={(map) => {
             setMap(map);
           }}
-          onDrag={(()=>{setDrag(true)})}
+          onDrag={() => {
+            setDrag(true);
+          }}
         >
           {directionsResponse1 && (
             <>
@@ -500,37 +508,39 @@ export default function LandingPage({ params }) {
             getCurrentSpeedFromFooter={getCurrentSpeedFromFooter}
             reachingProbability={reachingProbability}
             setDrag={setDrag}
+            getOptimized={getOptimized}
           />
         )}
 
-        <section
-          className="info"
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            position: "absolute",
-            zIndex: "100000",
-            bottom: "5.5rem",
-            left: "0",
-            color: "white",
-            backgroundColor: "black",
-            borderRadius: "10px",
-            padding: "0.5rem",
-            alignItems: "center",
-          }}
-        >
-          <div className="signal">
-            <div
-              className="signal"
-              style={{
-                backgroundColor: `${displayInfo.signal_status}`,
-                height: "2rem",
-                width: "2rem",
-                borderRadius: "50%",
-              }}
-            ></div>
-          </div>
-          {/* <div className="values">
+        {optimizedFlag && (
+          <section
+            className="info"
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              position: "absolute",
+              zIndex: "100000",
+              bottom: "5.5rem",
+              left: "0",
+              color: "white",
+              backgroundColor: "black",
+              borderRadius: "10px",
+              padding: "0.5rem",
+              alignItems: "center",
+            }}
+          >
+            <div className="signal">
+              <div
+                className="signal"
+                style={{
+                  backgroundColor: `${displayInfo.signal_status}`,
+                  height: "2rem",
+                  width: "2rem",
+                  borderRadius: "50%",
+                }}
+              ></div>
+            </div>
+            {/* <div className="values">
             <h6 style={{ margin: "0", fontWeight: "400" }}>
               Current Speed:{" "}
               {displayInfo.current_speed
@@ -555,7 +565,8 @@ export default function LandingPage({ params }) {
               {displayInfo.green_window ? `${displayInfo.green_window}s` : "--"}
             </h6>
           </div> */}
-        </section>
+          </section>
+        )}
       </div>
     )
   );

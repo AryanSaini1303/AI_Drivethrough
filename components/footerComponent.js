@@ -20,7 +20,8 @@ export default function FooterComponent({
   trafficSignalSaturation,
   getCurrentSpeedFromFooter,
   reachingProbability,
-  setDrag
+  setDrag,
+  getOptimized
 }) {
   const [loadingDelay, setLoadingDelay] = useState(5);
   const [optimizing, setOptimizing] = useState(false);
@@ -47,6 +48,7 @@ export default function FooterComponent({
       setLoadingDelay(delay);
       setTimeout(() => {
         setOptimized(true);
+        getOptimized(true);
         setOptimizing(false);
         if (watchId) {
           // console.log("Clearing previous watchId:", watchId);
