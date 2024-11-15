@@ -40,53 +40,6 @@ export default function FooterComponent({
     }
   }
 
-  function startNavigation() {
-    if (directionsResponse1) {
-      setOptimizing(true);
-      setNavigationFlag(true);
-      const delay = Math.floor(Math.random() * (10 - 5)) + 5; // Random delay between 5 and 10 seconds
-      setLoadingDelay(delay);
-      setTimeout(() => {
-        setOptimized(true);
-        getOptimized(true);
-        setOptimizing(false);
-        if (watchId) {
-          // console.log("Clearing previous watchId:", watchId);
-          navigator.geolocation.clearWatch(watchId);
-          setWatchId(null);
-        }
-        if (!watchId && navigator.geolocation) {
-          // console.log("Starting new geolocation watch");
-          const id = navigator.geolocation.watchPosition(
-            (position) => {
-              const { latitude, longitude } = position.coords;
-              let currentSpeed=position.coords.speed;
-              currentSpeed=(currentSpeed);
-              console.log(currentSpeed);
-              setSpeed(currentSpeed*1.1);
-              getCurrentSpeedFromFooter(currentSpeed);
-              setCarPosition({ lat: latitude, lng: longitude });
-              // setCenterLat(latitude);
-              // setCenterLng(longitude);
-            },
-            (error) => {
-              handleGeolocationError(error);
-            },
-            {
-              enableHighAccuracy: true,
-              maximumAge: 0,
-              timeout: 10000, // 10 seconds timeout for geolocation
-            }
-          );
-          // console.log("New watchId set:", id);
-          setWatchId(id);
-        } else {
-          alert("Geolocation is not supported by this browser.");
-        }
-      }, delay * 1000);
-    }
-  }
-
   useEffect(() => {
     getOptimizing(optimizing);
   }, [optimizing]);
@@ -165,7 +118,6 @@ export default function FooterComponent({
         <SpeedDials speed={speed} predictedSpeed={predictedSpeed} trafficSignalSaturation={trafficSignalSaturation} reachingProbability={reachingProbability}/>
       ) : (
         <button
-          onClick={startNavigation}
           style={{ top: "2rem", zIndex: "1000" }}
         >
           {!optimizing ? "Start Journey" : "Optimizing Journey"}
