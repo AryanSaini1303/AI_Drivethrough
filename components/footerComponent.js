@@ -22,6 +22,7 @@ export default function FooterComponent({
   reachingProbability,
   setDrag,
   getOptimized,
+  prediction
 }) {
   const [loadingDelay, setLoadingDelay] = useState(5);
   const [optimizing, setOptimizing] = useState(false);
@@ -167,6 +168,7 @@ export default function FooterComponent({
           predictedSpeed={predictedSpeed}
           trafficSignalSaturation={trafficSignalSaturation}
           reachingProbability={reachingProbability}
+          prediction={prediction}
         />
       ) : (
         <button

@@ -1,8 +1,9 @@
 'use client'
 import { useEffect, useState } from "react"
 import styles from "./speedDials.module.css"
-export default function SpeedDials({speed, predictedSpeed, trafficSignalSaturation, reachingProbability}){
+export default function SpeedDials({speed, predictedSpeed, trafficSignalSaturation, reachingProbability, prediction}){
     console.log(reachingProbability);
+    console.log(prediction);
     return(
         <div className={styles.container}>
             {reachingProbability!==101&&<div className={styles.probCurve} style={reachingProbability===25?{transform:"rotate(-180deg)"}:null}></div>}

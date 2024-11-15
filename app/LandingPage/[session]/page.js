@@ -532,6 +532,7 @@ export default function LandingPage({ params }) {
             reachingProbability={reachingProbability}
             setDrag={setDrag}
             getOptimized={getOptimized}
+            prediction={prediction}
           />
         )}
 
