@@ -21,12 +21,12 @@ export default function FooterComponent({
   getCurrentSpeedFromFooter,
   reachingProbability,
   setDrag,
-  getOptimized
+  getOptimized,
 }) {
   const [loadingDelay, setLoadingDelay] = useState(5);
   const [optimizing, setOptimizing] = useState(false);
   const [optimized, setOptimized] = useState(false);
-  const [speed,setSpeed]=useState(null);
+  const [speed, setSpeed] = useState(null);
 
   useEffect(() => {
     const geo = navigator.geolocation;
@@ -37,6 +37,53 @@ export default function FooterComponent({
     if (position && !directionsResponse1) {
       setCenterLat(position.coords.latitude);
       setCenterLng(position.coords.longitude);
+    }
+  }
+
+  function startNavigation() {
+    if (directionsResponse1) {
+      setOptimizing(true);
+      setNavigationFlag(true);
+      const delay = Math.floor(Math.random() * (10 - 5)) + 5; // Random delay between 5 and 10 seconds
+      setLoadingDelay(delay);
+      setTimeout(() => {
+        setOptimized(true);
+        getOptimized(true);
+        setOptimizing(false);
+        if (watchId) {
+          // console.log("Clearing previous watchId:", watchId);
+          navigator.geolocation.clearWatch(watchId);
+          setWatchId(null);
+        }
+        if (!watchId && navigator.geolocation) {
+          // console.log("Starting new geolocation watch");
+          const id = navigator.geolocation.watchPosition(
+            (position) => {
+              const { latitude, longitude } = position.coords;
+              // let currentSpeed=position.coords.speed;
+              let currentSpeed = 35;
+              console.log(currentSpeed);
+              setSpeed(currentSpeed * 1.1);
+              getCurrentSpeedFromFooter(currentSpeed);
+              setCarPosition({ lat: latitude, lng: longitude });
+              // setCenterLat(latitude);
+              // setCenterLng(longitude);
+            },
+            (error) => {
+              handleGeolocationError(error);
+            },
+            {
+              enableHighAccuracy: true,
+              maximumAge: 0,
+              timeout: 10000, // 10 seconds timeout for geolocation
+            }
+          );
+          // console.log("New watchId set:", id);
+          setWatchId(id);
+        } else {
+          alert("Geolocation is not supported by this browser.");
+        }
+      }, delay * 1000);
     }
   }
 
@@ -115,9 +162,15 @@ export default function FooterComponent({
         </svg>
       </button>
       {optimized ? (
-        <SpeedDials speed={speed} predictedSpeed={predictedSpeed} trafficSignalSaturation={trafficSignalSaturation} reachingProbability={reachingProbability}/>
+        <SpeedDials
+          speed={speed}
+          predictedSpeed={predictedSpeed}
+          trafficSignalSaturation={trafficSignalSaturation}
+          reachingProbability={reachingProbability}
+        />
       ) : (
         <button
+          onClick={startNavigation}
           style={{ top: "2rem", zIndex: "1000" }}
         >
           {!optimizing ? "Start Journey" : "Optimizing Journey"}

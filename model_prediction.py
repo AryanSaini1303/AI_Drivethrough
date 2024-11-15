@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import matplotlib.pyplot as plt
-from sklearn.svm import SVR
+import joblib
 
 # Load the dataset
 df = pd.read_excel("./traffic_data1.xlsx")
@@ -37,8 +37,8 @@ mae = mean_absolute_error(y_test, y_pred)
 mse = mean_squared_error(y_test, y_pred)
 r2 = r2_score(y_test, y_pred)
 
-print(f'Mean Absolute Error: {mae}')
-print(f'Mean Squared Error: {mse}')
+# print(f'Mean Absolute Error: {mae}')
+# print(f'Mean Squared Error: {mse}')
 print(f'R² Score: {r2}')
 
 # # Histogram of residuals
@@ -65,7 +65,7 @@ plt.show()
 new_data = pd.DataFrame({
     'Time_Quarter': [label_encoder.transform([0])[0]],
     # 'Date':[label_encoder.transform([2])[0]],
-    'Day_Number': [label_encoder.transform([0])[0]]      
+    'Day_Number': [label_encoder.transform([0])[0]]   
 })
 predicted_traffic = model.predict(new_data)
 # print(f'Predicted Traffic Situation for the new data: {round(predicted_traffic[0],0)}')
@@ -79,3 +79,7 @@ elif round(predicted_traffic[0],0)==2:
 else:
     level='Heavy'
 print("The Predicted Traffic Density is",level)
+
+# Save the model to a .pkl file
+joblib.dump(model, 'model.pkl')
+print("Model saved as model.pkl")

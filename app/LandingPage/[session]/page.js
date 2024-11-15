@@ -81,6 +81,29 @@ export default function LandingPage({ params }) {
   };
   const [drag, setDrag] = useState(false);
   const [optimizedFlag, setOptimizedFlag] = useState(false);
+  const [prediction, setPrediction] = useState(null);
+  const [features, setFeatures] = useState([0, 0, 0]);
+
+  const getPrediction = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ features }), // Send features to the Python API
+      });
+      const data = await response.json();
+      console.log(data);
+      setPrediction(data.prediction); // Use prediction in your app
+    } catch (error) {
+      console.error("Error fetching prediction:", error);
+    }
+  };
+
+  useEffect(() => {
+    getPrediction();
+  }, []);
 
   // Get current position of the user
   function getCoords(position) {
