@@ -23,6 +23,7 @@ df['Volume'] = volume_encoder.fit_transform(df['Volume'])
 
 # Features and target
 X = df[['Day', 'Time', 'Speed']]
+print(X)
 y = df['Volume']
 
 # Split the dataset
@@ -35,15 +36,15 @@ model.fit(X_train, y_train)
 # Predictions
 y_pred = model.predict(X_test)
 
-# # Histogram of residuals
-# residuals=y_test-y_pred
-# plt.figure(figsize=(8, 6))
-# plt.hist(residuals, bins=20, alpha=0.7, color="blue")
-# plt.axvline(x=0, color='red', linestyle='--', linewidth=2)
-# plt.xlabel("Residuals")
-# plt.ylabel("Frequency")
-# plt.title("Distribution of Residuals")
-# plt.show()
+# Histogram of residuals
+residuals=y_test-y_pred
+plt.figure(figsize=(8, 6))
+plt.hist(residuals, bins=20, alpha=0.7, color="blue")
+plt.axvline(x=0, color='red', linestyle='--', linewidth=2)
+plt.xlabel("Residuals")
+plt.ylabel("Frequency")
+plt.title("Distribution of Residuals")
+plt.show()
 
 # Evaluation: Accuracy
 accuracy = accuracy_score(y_test, y_pred)
