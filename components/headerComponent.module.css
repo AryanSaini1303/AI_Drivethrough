@@ -1,9 +1,9 @@
 .container {
   position: absolute;
-  left: 50%;
+  left: 44%;
   transform: translate(-50%, 0%);
   z-index: 10000;
-  width: 100vw;
+  width: fit-content;
   /* backdrop-filter: blur(10px); */
   /* border: solid white 2px; */
   /* box-shadow: 0 0 15rem #00ffffc2; */
