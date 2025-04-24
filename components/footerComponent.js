@@ -61,8 +61,8 @@ export default function FooterComponent({
           const id = navigator.geolocation.watchPosition(
             (position) => {
               const { latitude, longitude } = position.coords;
-              // let currentSpeed=position.coords.speed;
-              let currentSpeed = 35;
+              let currentSpeed=position.coords.speed;
+              // let currentSpeed = 35;
               console.log(currentSpeed);
               setSpeed(currentSpeed * 1.1);
               getCurrentSpeedFromFooter(currentSpeed);
