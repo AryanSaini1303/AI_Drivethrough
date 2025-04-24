@@ -127,6 +127,7 @@ export default function FooterComponent({
     setDirectionsResponse1(null);
     setClearRouteFlag(true);
     setOptimized(false);
+    window.location.reload();
     // Stop the geolocation watch if it exists
     if (watchId) {
       navigator.geolocation.clearWatch(watchId);
